@@ -1,0 +1,362 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="a9a08896-2fca-4be8-8719-007b9aad069b" name="Default Changelist" comment="" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="DatabaseView">
+    <option name="SHOW_INTERMEDIATE" value="true" />
+    <option name="GROUP_DATA_SOURCES" value="true" />
+    <option name="GROUP_SCHEMA" value="true" />
+    <option name="GROUP_CONTENTS" value="false" />
+    <option name="SORT_POSITIONED" value="false" />
+    <option name="SHOW_EMPTY_GROUPS" value="false" />
+    <option name="AUTO_SCROLL_FROM_SOURCE" value="false" />
+    <option name="HIDDEN_KINDS">
+      <set />
+    </option>
+    <expand />
+    <select />
+  </component>
+  <component name="DjangoConsoleOptions" custom-start-script="import sys; print('Python %s on %s' % (sys.version, sys.platform))&#10;import django; print('Django %s' % django.get_version())&#10;sys.path.extend([WORKING_DIR_AND_PYTHON_PATHS])&#10;if 'setup' in dir(django): django.setup()&#10;import django_manage_shell; django_manage_shell.run(PROJECT_ROOT)">
+    <option name="myCustomStartScript" value="import sys; print('Python %s on %s' % (sys.version, sys.platform))&#10;import django; print('Django %s' % django.get_version())&#10;sys.path.extend([WORKING_DIR_AND_PYTHON_PATHS])&#10;if 'setup' in dir(django): django.setup()&#10;import django_manage_shell; django_manage_shell.run(PROJECT_ROOT)" />
+  </component>
+  <component name="FavoritesManager">
+    <favorites_list name="HotSchool" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Python Script" />
+      </list>
+    </option>
+  </component>
+  <component name="ProjectId" id="1bnixh2wDafVEWBwMiYpwVYY8Vt" />
+  <component name="ProjectViewState">
+    <option name="autoscrollToSource" value="true" />
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showExcludedFiles" value="true" />
+    <option name="showLibraryContents" value="true" />
+    <option name="showMembers" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="DatabaseDriversLRU" value="mysql" />
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/media/headimage" />
+    <property name="node.js.detected.package.eslint" value="true" />
+    <property name="node.js.detected.package.tslint" value="true" />
+    <property name="node.js.path.for.package.eslint" value="project" />
+    <property name="node.js.path.for.package.tslint" value="project" />
+    <property name="node.js.selected.package.eslint" value="(autodetect)" />
+    <property name="node.js.selected.package.tslint" value="(autodetect)" />
+    <property name="restartRequiresConfirmation" value="false" />
+    <property name="run.code.analysis.last.selected.profile" value="aDefault" />
+    <property name="settings.editor.selected.configurable" value="reference.settingsdialog.IDE.editor.colors" />
+  </component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\m\PycharmProjects\HotSchool\apps" />
+      <recent name="C:\Users\m\PycharmProjects\HotSchool" />
+    </key>
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\m\PycharmProjects\HotSchool\media\headimage" />
+    </key>
+  </component>
+  <component name="RunManager" selected="Django server.HotSchool">
+    <configuration name="0010_auto_20200605_0943" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="HotSchool" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/apps/user/migrations" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/apps/user/migrations/0010_auto_20200605_0943.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="99999" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="HotSchool" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/apps/user" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/apps/user/99999.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="algorithms" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="HotSchool" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/apps/question" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/apps/question/algorithms.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="test222" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="HotSchool" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/apps/user" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/apps/user/test222.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="tests" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="HotSchool" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/apps/user" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/apps/user/tests.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="HotSchool" type="Python.DjangoServer" factoryName="Django server">
+      <module name="HotSchool" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+        <env name="DJANGO_SETTINGS_MODULE" value="HotSchool.settings" />
+      </envs>
+      <option name="SDK_HOME" value="C:\Users\m\Envs\hotschool\Scripts\python.exe" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="launchJavascriptDebuger" value="false" />
+      <option name="host" value="0.0.0.0" />
+      <option name="additionalOptions" value="" />
+      <option name="browserUrl" value="" />
+      <option name="runTestServer" value="false" />
+      <option name="runNoReload" value="false" />
+      <option name="useCustomRunCommand" value="false" />
+      <option name="customRunCommand" value="" />
+      <method v="2" />
+    </configuration>
+    <list>
+      <item itemvalue="Django server.HotSchool" />
+      <item itemvalue="Python.0010_auto_20200605_0943" />
+      <item itemvalue="Python.algorithms" />
+      <item itemvalue="Python.test222" />
+      <item itemvalue="Python.99999" />
+      <item itemvalue="Python.tests" />
+    </list>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Python.tests" />
+        <item itemvalue="Python.test222" />
+        <item itemvalue="Python.99999" />
+        <item itemvalue="Python.0010_auto_20200605_0943" />
+        <item itemvalue="Python.algorithms" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="StructureViewFactory">
+    <option name="AUTOSCROLL_MODE" value="false" />
+  </component>
+  <component name="SvnConfiguration">
+    <configuration />
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="a9a08896-2fca-4be8-8719-007b9aad069b" name="Default Changelist" comment="" />
+      <created>1589274506287</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1589274506287</updated>
+      <workItem from="1589274508136" duration="31092000" />
+      <workItem from="1589436783512" duration="12749000" />
+      <workItem from="1589507949885" duration="9048000" />
+      <workItem from="1589608266421" duration="6375000" />
+      <workItem from="1589702092091" duration="6753000" />
+      <workItem from="1589781414768" duration="16638000" />
+      <workItem from="1589803375863" duration="550000" />
+      <workItem from="1589805172168" duration="91000" />
+      <workItem from="1589939028417" duration="18594000" />
+      <workItem from="1589967081555" duration="237000" />
+      <workItem from="1590020960896" duration="26000" />
+      <workItem from="1590021175760" duration="120000" />
+      <workItem from="1590024380012" duration="4712000" />
+      <workItem from="1590220553043" duration="6906000" />
+      <workItem from="1590463396674" duration="8021000" />
+      <workItem from="1590475992316" duration="5216000" />
+      <workItem from="1590574171099" duration="43171000" />
+      <workItem from="1591057181025" duration="49292000" />
+      <workItem from="1591241658257" duration="57064000" />
+      <workItem from="1591524465658" duration="10348000" />
+      <workItem from="1591614336438" duration="267000" />
+      <workItem from="1591617659641" duration="554000" />
+      <workItem from="1591623235167" duration="1960000" />
+      <workItem from="1591625208933" duration="700000" />
+      <workItem from="1591625921515" duration="4416000" />
+      <workItem from="1591677682912" duration="21739000" />
+      <workItem from="1591752460613" duration="23247000" />
+      <workItem from="1591804941712" duration="29000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="1" />
+  </component>
+  <component name="WindowStateProjectService">
+    <state x="82" y="34" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1591783938276">
+      <screen x="0" y="0" width="1376" height="744" />
+    </state>
+    <state x="82" y="34" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.1376.744@0.0.1376.744" timestamp="1591783938276" />
+    <state x="439" y="181" key="#com.intellij.fileTypes.FileTypeChooser" timestamp="1589275434187">
+      <screen x="0" y="0" width="1376" height="744" />
+    </state>
+    <state x="439" y="181" key="#com.intellij.fileTypes.FileTypeChooser/0.0.1376.744@0.0.1376.744" timestamp="1589275434187" />
+    <state x="442" y="208" key="#com.intellij.ide.actions.ChooseComponentsToExportDialog" timestamp="1591521833619">
+      <screen x="0" y="0" width="1376" height="744" />
+    </state>
+    <state x="442" y="208" key="#com.intellij.ide.actions.ChooseComponentsToExportDialog/0.0.1376.744@0.0.1376.744" timestamp="1591521833619" />
+    <state x="410" y="21" key="#views" timestamp="1591362790473">
+      <screen x="0" y="0" width="1376" height="744" />
+    </state>
+    <state x="410" y="21" key="#views/0.0.1376.744@0.0.1376.744" timestamp="1591362790473" />
+    <state x="451" y="252" key="ANALYSIS_DLG_com.intellij.analysis.BaseAnalysisAction$1" timestamp="1590638837224">
+      <screen x="0" y="0" width="1376" height="744" />
+    </state>
+    <state x="451" y="252" key="ANALYSIS_DLG_com.intellij.analysis.BaseAnalysisAction$1/0.0.1376.744@0.0.1376.744" timestamp="1590638837224" />
+    <state width="1333" height="360" key="GridCell.Tab.0.bottom" timestamp="1591788870413">
+      <screen x="0" y="0" width="1376" height="744" />
+    </state>
+    <state width="1333" height="360" key="GridCell.Tab.0.bottom/0.0.1376.744@0.0.1376.744" timestamp="1591788870413" />
+    <state width="1333" height="360" key="GridCell.Tab.0.center" timestamp="1591788870413">
+      <screen x="0" y="0" width="1376" height="744" />
+    </state>
+    <state width="1333" height="360" key="GridCell.Tab.0.center/0.0.1376.744@0.0.1376.744" timestamp="1591788870413" />
+    <state width="1333" height="360" key="GridCell.Tab.0.left" timestamp="1591788870412">
+      <screen x="0" y="0" width="1376" height="744" />
+    </state>
+    <state width="1333" height="360" key="GridCell.Tab.0.left/0.0.1376.744@0.0.1376.744" timestamp="1591788870412" />
+    <state width="1333" height="360" key="GridCell.Tab.0.right" timestamp="1591788870413">
+      <screen x="0" y="0" width="1376" height="744" />
+    </state>
+    <state width="1333" height="360" key="GridCell.Tab.0.right/0.0.1376.744@0.0.1376.744" timestamp="1591788870413" />
+    <state width="1333" height="360" key="GridCell.Tab.1.bottom" timestamp="1591788870413">
+      <screen x="0" y="0" width="1376" height="744" />
+    </state>
+    <state width="1333" height="360" key="GridCell.Tab.1.bottom/0.0.1376.744@0.0.1376.744" timestamp="1591788870413" />
+    <state width="1333" height="360" key="GridCell.Tab.1.center" timestamp="1591788870413">
+      <screen x="0" y="0" width="1376" height="744" />
+    </state>
+    <state width="1333" height="360" key="GridCell.Tab.1.center/0.0.1376.744@0.0.1376.744" timestamp="1591788870413" />
+    <state width="1333" height="360" key="GridCell.Tab.1.left" timestamp="1591788870413">
+      <screen x="0" y="0" width="1376" height="744" />
+    </state>
+    <state width="1333" height="360" key="GridCell.Tab.1.left/0.0.1376.744@0.0.1376.744" timestamp="1591788870413" />
+    <state width="1333" height="360" key="GridCell.Tab.1.right" timestamp="1591788870413">
+      <screen x="0" y="0" width="1376" height="744" />
+    </state>
+    <state width="1333" height="360" key="GridCell.Tab.1.right/0.0.1376.744@0.0.1376.744" timestamp="1591788870413" />
+    <state width="199" height="477" key="HiddenNamespacesPopup" timestamp="1591281547325">
+      <screen x="0" y="0" width="1376" height="744" />
+    </state>
+    <state width="199" height="477" key="HiddenNamespacesPopup/0.0.1376.744@0.0.1376.744" timestamp="1591281547325" />
+    <state x="192" y="18" key="SettingsEditor" timestamp="1591528610139">
+      <screen x="0" y="0" width="1376" height="744" />
+    </state>
+    <state x="192" y="18" key="SettingsEditor/0.0.1376.744@0.0.1376.744" timestamp="1591528610139" />
+    <state width="698" height="382" key="XDebugger.FullValuePopup" timestamp="1591784774226">
+      <screen x="0" y="0" width="1376" height="744" />
+    </state>
+    <state width="698" height="382" key="XDebugger.FullValuePopup/0.0.1376.744@0.0.1376.744" timestamp="1591784774226" />
+    <state x="322" y="98" width="732" height="548" key="find.popup" timestamp="1589440087882">
+      <screen x="0" y="0" width="1376" height="744" />
+    </state>
+    <state x="322" y="98" width="732" height="548" key="find.popup/0.0.1376.744@0.0.1376.744" timestamp="1589440087882" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/apps/user/tests.py</url>
+          <line>18</line>
+          <option name="timeStamp" value="35" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
+    <watches-manager>
+      <configuration name="Python.DjangoServer">
+        <watch expression="request.data['code']" language="Python" />
+        <watch expression="request.data['code']" language="Python" />
+      </configuration>
+    </watches-manager>
+  </component>
+  <component name="com.intellij.coverage.CoverageDataManagerImpl">
+    <SUITE FILE_PATH="coverage/HotSchool$algorithms.coverage" NAME="algorithms Coverage Results" MODIFIED="1589954048839" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/apps/question" />
+    <SUITE FILE_PATH="coverage/HotSchool$99999.coverage" NAME="99999 Coverage Results" MODIFIED="1591679116142" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/apps/user" />
+    <SUITE FILE_PATH="coverage/HotSchool$tests.coverage" NAME="tests Coverage Results" MODIFIED="1591784495652" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/apps/user" />
+    <SUITE FILE_PATH="coverage/HotSchool$test222.coverage" NAME="test222 Coverage Results" MODIFIED="1591696323324" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/apps/user" />
+    <SUITE FILE_PATH="coverage/HotSchool$0010_auto_20200605_0943.coverage" NAME="0010_auto_20200605_0943 Coverage Results" MODIFIED="1591325569462" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/apps/user/migrations" />
+  </component>
+</project>
