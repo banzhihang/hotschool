@@ -11,8 +11,6 @@ urlpatterns = [
     path('answer/', MyAnswerView.as_view()),
     # 用户问题
     path('question/', MyQuestionView.as_view()),
-    # 用户评论
-    path('comment/', MyCommentView.as_view()),
     # 用户收藏
     path('collect/', MyCollectView.as_view()),
     # 用户关注

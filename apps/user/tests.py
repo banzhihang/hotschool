@@ -7,14 +7,25 @@ import re
 
 from django.core.files.uploadedfile import InMemoryUploadedFile
 
-img_url = 'https://wx.qlogo.cn/mmopen/vi_32/E2L7eCcteRTnqE6klRT4tcTNYUb2arB7iaicQdlHQuHUcryJezXbtptggsxnWZSqg4AernyGEMSic7iaXoVicdkDJyA/132'
-res2 = requests.get(img_url)
+# img_url = 'https://wx.qlogo.cn/mmopen/vi_32/E2L7eCcteRTnqE6klRT4tcTNYUb2arB7iaicQdlHQuHUcryJezXbtptggsxnWZSqg4AernyGEMSic7iaXoVicdkDJyA/132'
+# # res2 = requests.get(img_url)
+# #
+# # a=res2.content
+# # tail = res2.headers.get("Content-Type")
+# # pattern = re.compile('[^/]+$')
+# # b=re.findall(pattern,tail)
+# # print(tail)
+# # bytes_stream = BytesIO(a)
+# # image = InMemoryUploadedFile(bytes_stream, None, 'aa'+'.'+b[0], None, len(a), None, None)
+# # print(1)
 
-a=res2.content
-tail = res2.headers.get("Content-Type")
-pattern = re.compile('[^/]+$')
-b=re.findall(pattern,tail)
-print(tail)
-bytes_stream = BytesIO(a)
-image = InMemoryUploadedFile(bytes_stream, None, 'aa'+'.'+b[0], None, len(a), None, None)
-print(1)
+# a = '"娱乐,美女"'
+# list = a.strip(";").split(',')
+# #pattern = re.compile('^[^"]*[^"]$')
+# #interests = re.findall(pattern,a)[0]
+# print(list)
+# print(type(list))
+
+a = {'a':22}
+b = a.get('b')
+print(b)

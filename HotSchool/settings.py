@@ -28,7 +28,8 @@ SECRET_KEY = 'ay41!8_m%x4vzvrxev%)6h6d-#@@1#6@68sy9zzm7i*094-xtd'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
-
+# 域名
+domain_name = 'http://127.0.0.1:8000'
 ALLOWED_HOSTS = ['*']
 
 REST_FRAMEWORK = {

@@ -49,11 +49,13 @@ class UserInfoView(APIView):
     authentication_classes = [Authtication, ]
 
     def get(self, request):
-        """获取用户信息"""
-
-        user = get_user_info(request.user.pk)
-        # 序列化
-        user = UserInfoSerializer(instance=user)
+        """
+        获取用户信息
+         参数:无
+         要求:必须带上token
+         返回值:包含用户信息的一个字典
+        """
+        user = UserInfoSerializer(instance=request.user,context={'request': request})
         return Response(user.data)
 
     def put(self,request):
@@ -61,7 +63,7 @@ class UserInfoView(APIView):
         user = User.objects.get(pk=request.user.pk)
         # 修改图片名字
         request = modify_image_name(request)
-        ser = UserInfoSerializer(data=request.data,instance=user)
+        ser = UpdateUserInfoSerializer(data=request.data,instance=user)
         if ser.is_valid():
             ser.save()
             return Response({'state': 'ok'})
@@ -75,10 +77,15 @@ class RecentBrowseView(APIView):
 
     def get(self, request):
         """获取用户的浏览记录"""
-        question, answer = get_recent_browse(request.user.pk)
+        recent_browse_questions = RecentBrowseQuestion.objects.filter(
+            user=request.user.pk)
+        recent_browse_answers = RecentBrowseAnswer.objects.filter(
+            user=request.user.pk)
 
-        questions = UserRecentBrowseQuestionSerializer(instance=question, many=True)
-        answers = UserRecentBrowseAnswerSerializer(instance=answer, many=True)
+        questions = UserRecentBrowseQuestionSerializer(instance=recent_browse_questions,
+                                                       many=True,context={'request':request})
+        answers = UserRecentBrowseAnswerSerializer(instance=recent_browse_answers,
+                                                   many=True,context={'request':request})
 
         return Response({'questions': questions.data, 'answers': answers.data})
 
@@ -87,37 +94,27 @@ class RecentBrowseView(APIView):
         # 获得该列表之后去RecentBrowseAnswer，RecentBrowseAnswer这两个表将用户数据删除
         answter_record_list = request.data['answter_record_list']
         question_record_list = request.data['question_record_list']
-        if answter_record_list:
-            try:
-                RecentBrowseAnswer.objects.filter(answer_id__in=answter_record_list,
-                                                  user_id=request.user.id).delete()
-                state1= 'ok'
-            except Exception:
-                state1 = 'fail'
-        if question_record_list:
-            try:
-                RecentBrowseQuestion.objects.filter(question_id__in=question_record_list,
-                                                    user_id=request.user.id).delete()
-                state2 = 'ok'
-            except Exception:
-                state2 = 'fail'
+
+        state1,state2 = delete_recent_browse(request,answter_record_list,question_record_list)
 
         return Response({'Astate':state1,'Qstate':state2})
 
 
-
-
 class MyAnswerView(APIView):
-    """用户的回答"""
+    """用户的回答 评论 回复"""
     authentication_classes = [Authtication, ]
 
     def get(self, request):
-        """获取用户的回答"""
-        answer = get_user_answer(request.user.pk)
+        """获取用户的回答评论回复"""
+        answers = Answer.objects.filter(user=request.user.pk)
+        comments = Comment.objects.filter(user=request.user.pk)
+        reverts = Revert.objects.filter(user=request.user.pk)
 
-        answers = AnswerInfoSerializer(instance=answer, many=True)
+        answers = AnswerInfoSerializer(instance=answers, many=True,context={'request':request})
+        comments = CommentInfoSerializer(instance=comments,many=True,context={'request':request})
+        reverts = UserRevertInfoSerializer(instance=reverts,many=True,context={'request':request})
 
-        return Response(answers.data)
+        return Response({'answers':answers.data,'comments':comments.data,'reverts':reverts.data})
 
 
 class MyQuestionView(APIView):
@@ -127,25 +124,11 @@ class MyQuestionView(APIView):
     def get(self, request):
         """获取用户的问题"""
         # 获得问题的queryset
-        question = get_user_question(request.user.pk)
+        question = Question.objects.filter(user=request.user.pk)
         # 序列化
-        questions = QuestionInfoSerializer(instance=question, many=True)
+        questions = UserQuestionCollectSerializer(instance=question, many=True)
 
         return Response(questions.data)
-
-
-class MyCommentView(APIView):
-    """用户的评论"""
-    authentication_classes = [Authtication, ]
-
-    def get(self, request):
-        """获取用户的评论"""
-        comment, revert = get_user_comment(request.user.pk)
-
-        comments = CommentInfoSerializer(instance=comment, many=True)
-        reverts = RevertInfoSerializer(instance=revert, many=True)
-
-        return Response({'comments': comments.data, 'reverts': reverts.data})
 
 
 class MyCollectView(APIView):
@@ -154,10 +137,11 @@ class MyCollectView(APIView):
 
     def get(self, request):
         """获取用户的收藏"""
-        question, answer = get_user_collect(request.user.pk)
+        questions = request.user.question_collect.all()
+        answers = request.user.answer_collect.all()
 
-        questions = QuestionInfoSerializer(instance=question, many=True)
-        answers = AnswerInfoSerializer(instance=answer, many=True)
+        questions = UserQuestionCollectSerializer(instance=questions, many=True)
+        answers = AnswerInfoSerializer(instance=answers, many=True,context={'request':request})
 
         return Response({'questions': questions.data, 'answers': answers.data})
 
@@ -170,8 +154,21 @@ class MyAttentionView(APIView):
 
     def get(self, request):
         # 获取用户关注的人
-        attention = get_user_attention(request.user.pk)
-
-        attentions = UserInfoSerializer(instance=attention, many=True)
-
+        attention = request.user.attention.all()
+        attentions = UserAttentionSerializer(instance=attention,many=True,
+                                             context={'request': request})
         return Response(attentions.data)
+
+    def delete(self,request):
+        """取消用户关注的人"""
+        target_user_id = request.data['target_id']
+        try:
+            # 同时删除两张表中的记录，保持数据一致
+            request.user.attention.remove(target_user_id)
+            AttentionRelation.objects.get(target_user=target_user_id,user=request.user.pk).delete()
+        except:
+            return Response({'state':'fail'})
+        else:
+            return Response({'state': 'success'})
+
+

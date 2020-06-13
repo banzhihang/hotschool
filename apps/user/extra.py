@@ -6,6 +6,7 @@ from io import BytesIO
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from rest_framework import exceptions
 from rest_framework.authentication import BasicAuthentication
+from rest_framework.response import Response
 from rest_framework_jwt.authentication import jwt_decode_handler
 from rest_framework_jwt.utils import jwt_get_user_id_from_payload_handler
 
@@ -18,13 +19,18 @@ def random_string(slen=30): #截取长度不能超过指定序列的长度
 def modify_image_name(request):
     # 修改图片的名字，解决了不能上传含有中文名的图片的问题.使用正则表达式匹配图片的content_type,获得图片的格式
     # 使用随机字符串代替原始图片名
-    img_type = request.data.get('head_portrait').content_type
-    pattern = re.compile('[^/]+$')
-    tail = re.findall(pattern, img_type)
-    path = random_string() + '.' + tail[0]
-    request.data.get('head_portrait').name = path
+    try:
+        img_type = request.data.get('head_portrait').content_type
+    except:
+        return request
+    else:
+        pattern = re.compile('[^/]+$')
+        tail = re.findall(pattern, img_type)
+        path = random_string() + '.' + tail[0]
+        request.data.get('head_portrait').name = path
+        return request
 
-    return request
+
 
 class OpenIdAndImage:
     """获取openid和用户微信头像"""
@@ -54,8 +60,8 @@ class OpenIdAndImage:
             tail = re.findall(pattern, image_type)
             image = InMemoryUploadedFile(image, None, random_string()
                                          +'.'+tail[0], None, len(rest3), None, None)
-        except KeyError:
-            return 'fail'
+        except:
+            Response({"msg": "登录失败"})
         else:
             return openid,image
 

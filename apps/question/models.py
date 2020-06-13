@@ -1,6 +1,3 @@
-from datetime import datetime
-import time
-
 from django.db import models
 import django.utils.timezone as timezone
 
@@ -34,6 +31,8 @@ class Comment(models.Model):
     answer = models.ForeignKey('Answer', on_delete=models.CASCADE, verbose_name='所属回答', default=1)
     content = models.TextField(max_length=1000, verbose_name='用户评论', default='')
     approval_number = models.IntegerField(verbose_name='获赞数', default=0)
+    vote_number = models.IntegerField(verbose_name='投票总数', default=0)
+
     add_time = models.DateTimeField(auto_now_add=True, verbose_name='添加时间')
     modify_time = models.DateTimeField(default=timezone.now, verbose_name='内容修改时间')
 
@@ -46,11 +45,12 @@ class Revert(models.Model):
     """回复表"""
     comment = models.ForeignKey('Comment', on_delete=models.CASCADE, verbose_name='所属的评论')
     user = models.ForeignKey('user.User', on_delete=models.CASCADE, verbose_name='所属的用户',
-                             related_name='comment_user')
+                             related_name='revert_comment_user')
     target_user = models.ForeignKey('user.User', verbose_name='被回复的人', on_delete=models.CASCADE,
-                                    related_name='target_user')
+                                    related_name='revert_target_user')
     content = models.CharField(max_length=100, verbose_name='回复内容', default='')
     approval_number = models.IntegerField(verbose_name='获赞数', default=0)
+    vote_number = models.IntegerField(verbose_name='投票总数', default=0)
     add_time = models.DateTimeField(auto_now_add=True, verbose_name='添加时间')
     modify_time = models.DateTimeField(default=timezone.now, verbose_name='内容修改时间')
 
@@ -188,3 +188,8 @@ class CollectRelation(models.Model):
     class meta:
         verbose_name = '收藏关系'
         verbose_name_plural = verbose_name
+
+class AttentionRelation(models.Model):
+    """关注关系"""
+    target_user = models.ForeignKey('user.User',on_delete=models.CASCADE,related_name='attention_target_user')
+    user = models.ForeignKey('user.User',on_delete=models.CASCADE,related_name='attention_user')

@@ -1,9 +1,5 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
-import django.utils.timezone as timezone
-
-from datetime import datetime
-
 
 class User(AbstractUser):
     """用户信息表"""
@@ -19,12 +15,12 @@ class User(AbstractUser):
     major = models.ForeignKey('Major', verbose_name='专业', on_delete=models.CASCADE,null=True)
     grade = models.ForeignKey('Grade', verbose_name='年级', on_delete=models.CASCADE,null=True)
     question_collect = models.ManyToManyField('question.Question', verbose_name='用户问题收藏',
-                                              related_name='question_collect',null=True)
+                                              related_name='question_collect')
     answer_collect = models.ManyToManyField('question.Answer', verbose_name='用户回答收藏',
-                                            related_name='answer_collect',null=True)
-    attention = models.ManyToManyField('self', verbose_name='用户关注', related_name='attention',null=True)
+                                            related_name='answer_collect')
+    attention = models.ManyToManyField('self', verbose_name='用户关注', related_name='attention')
 
-    interest = models.ManyToManyField('Interest', verbose_name='用户兴趣',null=True)
+    interest = models.ManyToManyField('Interest', verbose_name='用户兴趣')
     add_time = models.DateField(verbose_name='添加时间', auto_now_add=True)
 
     class meta:
