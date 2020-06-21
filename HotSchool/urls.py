@@ -34,5 +34,7 @@ urlpatterns = [
     # 问题相关
     path('question/', include('question.urls'), name='question'),
     # 操作相关
-    path('operation/', include('operation.urls'), name='question')
+    path('operation/', include('operation.urls'), name='question'),
+
+    path('chat/', include('communicate.urls'))
 ]

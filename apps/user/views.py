@@ -1,14 +1,10 @@
-
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_jwt.settings import api_settings
 
-from question.serializers import AnswerInfoSerializer, QuestionInfoSerializer, CommentInfoSerializer, \
-    RevertInfoSerializer
-from .extra import OpenIdAndImage, modify_image_name,Authtication,random_string
-from .logics import *
+from question.serializers import CommentInfoSerializer
+from .extra import OpenIdAndImage, modify_image_name,Authtication,random_string,MyCursorPagination
 from .serializers import *
-
 
 
 class LoginView(APIView):
@@ -66,9 +62,9 @@ class UserInfoView(APIView):
         ser = UpdateUserInfoSerializer(data=request.data,instance=user)
         if ser.is_valid():
             ser.save()
-            return Response({'state': 'ok'})
+            return Response({'status':'ok','error':''})
         else:
-            return Response({'error':ser.errors})
+            return Response({'status':'fail','error':ser.errors})
 
 
 class RecentBrowseView(APIView):
@@ -77,27 +73,28 @@ class RecentBrowseView(APIView):
 
     def get(self, request):
         """获取用户的浏览记录"""
-        recent_browse_questions = RecentBrowseQuestion.objects.filter(
-            user=request.user.pk)
         recent_browse_answers = RecentBrowseAnswer.objects.filter(
             user=request.user.pk)
 
-        questions = UserRecentBrowseQuestionSerializer(instance=recent_browse_questions,
-                                                       many=True,context={'request':request})
-        answers = UserRecentBrowseAnswerSerializer(instance=recent_browse_answers,
-                                                   many=True,context={'request':request})
+        page = MyCursorPagination()
+        page_roles = page.paginate_queryset(queryset=recent_browse_answers, request=request, view=self)
+        answers = UserRecentBrowseAnswerSerializer(instance=page_roles,
+                                    many=True,context={'request':request})
 
-        return Response({'questions': questions.data, 'answers': answers.data})
+        return page.get_paginated_response(answers.data)
 
     def delete(self,request):
-        # 删除用户浏览数据，前端传来用户删除的问题和回答id的列表(两个列表)
-        # 获得该列表之后去RecentBrowseAnswer，RecentBrowseAnswer这两个表将用户数据删除
+        # 删除用户浏览数据，前端传来用户删除的回答的id组成的列表
+        # 获得该列表之后去RecentBrowseAnswer表将用户数据删除
         answter_record_list = request.data['answter_record_list']
-        question_record_list = request.data['question_record_list']
+        try:
+            RecentBrowseAnswer.objects.filter(answer_id__in=answter_record_list,
+                                          user_id=request.user.id).delete()
+            status = 'ok'
+        except:
+            status = 'fail'
 
-        state1,state2 = delete_recent_browse(request,answter_record_list,question_record_list)
-
-        return Response({'Astate':state1,'Qstate':state2})
+        return Response({'Astatus':status})
 
 
 class MyAnswerView(APIView):
@@ -105,16 +102,26 @@ class MyAnswerView(APIView):
     authentication_classes = [Authtication, ]
 
     def get(self, request):
-        """获取用户的回答评论回复"""
-        answers = Answer.objects.filter(user=request.user.pk)
-        comments = Comment.objects.filter(user=request.user.pk)
-        reverts = Revert.objects.filter(user=request.user.pk)
-
-        answers = AnswerInfoSerializer(instance=answers, many=True,context={'request':request})
-        comments = CommentInfoSerializer(instance=comments,many=True,context={'request':request})
-        reverts = UserRevertInfoSerializer(instance=reverts,many=True,context={'request':request})
-
-        return Response({'answers':answers.data,'comments':comments.data,'reverts':reverts.data})
+        """
+        获取用户的回答评论回复,type=0, 为回答，1为评论，2为回复
+        """
+        type = int(request.query_params['type'])
+        page = MyCursorPagination()
+        if type == 0:
+            answers = Answer.objects.filter(user=request.user.pk)
+            page_roles = page.paginate_queryset(queryset=answers, request=request, view=self)
+            answers = UserAnswerInfoSerializer(instance=page_roles, many=True, context={'request': request})
+            return  page.get_paginated_response(answers.data)
+        elif type == 1:
+            comments = Comment.objects.filter(user=request.user.pk)
+            page_roles = page.paginate_queryset(queryset=comments, request=request, view=self)
+            comments = CommentInfoSerializer(instance=page_roles, many=True, context={'request': request})
+            return page.get_paginated_response(comments.data)
+        elif type == 2:
+            reverts = Revert.objects.filter(user=request.user.pk)
+            page_roles = page.paginate_queryset(queryset=reverts, request=request, view=self)
+            reverts = UserRevertInfoSerializer(instance=page_roles, many=True, context={'request': request})
+            return page.get_paginated_response(reverts.data)
 
 
 class MyQuestionView(APIView):
@@ -136,14 +143,23 @@ class MyCollectView(APIView):
     authentication_classes = [Authtication, ]
 
     def get(self, request):
-        """获取用户的收藏"""
-        questions = request.user.question_collect.all()
-        answers = request.user.answer_collect.all()
-
-        questions = UserQuestionCollectSerializer(instance=questions, many=True)
-        answers = AnswerInfoSerializer(instance=answers, many=True,context={'request':request})
-
-        return Response({'questions': questions.data, 'answers': answers.data})
+        """
+        获取用户的收藏,type为0，为问题，为1则为回答
+        """
+        type = int(request.query_params['type'])
+        if type == 0:
+            questions = request.user.question_collect.all()
+            # 分页
+            page = MyCursorPagination()
+            page_roles = page.paginate_queryset(queryset=questions, request=request, view=self)
+            questions = UserQuestionCollectSerializer(instance=page_roles, many=True)
+            return page.get_paginated_response(questions.data)
+        else:
+            answers = request.user.answer_collect.all()
+            page = MyCursorPagination()
+            page_roles = page.paginate_queryset(queryset=answers, request=request, view=self)
+            answers = UserAnswerCollectSerializer(instance=page_roles, many=True)
+            return page.get_paginated_response(answers.data)
 
 
 class MyAttentionView(APIView):
@@ -167,8 +183,8 @@ class MyAttentionView(APIView):
             request.user.attention.remove(target_user_id)
             AttentionRelation.objects.get(target_user=target_user_id,user=request.user.pk).delete()
         except:
-            return Response({'state':'fail'})
+            return Response({'status':'fail'})
         else:
-            return Response({'state': 'success'})
+            return Response({'status': 'success'})
 
 

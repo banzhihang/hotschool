@@ -1,11 +1,13 @@
 import re
+from collections import OrderedDict
+from io import BytesIO
 import requests
 import random, string
-from io import BytesIO
 
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from rest_framework import exceptions
 from rest_framework.authentication import BasicAuthentication
+from rest_framework.pagination import CursorPagination
 from rest_framework.response import Response
 from rest_framework_jwt.authentication import jwt_decode_handler
 from rest_framework_jwt.utils import jwt_get_user_id_from_payload_handler
@@ -51,15 +53,15 @@ class OpenIdAndImage:
         try:
             openid = res1.json()['openid']
             # 图像内容为二进制格式，要转换成django InMemoryUploadedFile类型
-            rest3 = res2.content
-            image = BytesIO(rest3)
+            res3 = res2.content
+            image = BytesIO(res3)
             # 改变图片的名字，用正则表达式匹配图像type,使用随机字符串代替原名字
             image_type = res2.headers.get("Content-Type")
             pattern = re.compile('[^/]+$')
             # 获得图像格式
             tail = re.findall(pattern, image_type)
             image = InMemoryUploadedFile(image, None, random_string()
-                                         +'.'+tail[0], None, len(rest3), None, None)
+                                         +'.'+tail[0], None, len(res3), None, None)
         except:
             Response({"msg": "登录失败"})
         else:
@@ -91,3 +93,23 @@ class Authtication(BasicAuthentication):
             raise exceptions.AuthenticationFailed('没有该用户')
         else:
             return user, None
+
+class MyCursorPagination(CursorPagination):
+    """自定义分页类"""
+    # url中页码参数
+    cursor_query_param = 'cursor'
+    # 每页默认数量
+    page_size = 2
+    # 排序规则
+    ordering = '-add_time'
+    # 控制每页显示数量的参数名
+    page_size_query_param = 'size'
+    # 每页最大显示数量
+    max_page_size = 20
+
+    # 自定义返回格式
+    def get_paginated_response(self, data):
+        return Response(OrderedDict([
+            ('next', self.get_next_link()),
+            ('results', data)
+        ]))

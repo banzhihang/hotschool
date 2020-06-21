@@ -81,17 +81,6 @@ class Interest(models.Model):
         verbose_name_plural = verbose_name
 
 
-class RecentBrowseQuestion(models.Model):
-    """最近浏览问题记录表"""
-    question = models.ForeignKey('question.Question',on_delete=models.CASCADE,verbose_name='问题')
-    add_time = models.DateTimeField(auto_now=True, verbose_name='浏览时间')
-    user = models.ForeignKey('User', on_delete=models.CASCADE)
-
-    class meta:
-        verbose_name = '最近浏览问题'
-        verbose_name_plural = verbose_name
-
-
 class RecentBrowseAnswer(models.Model):
     """最近浏览回答记录表"""
     answer = models.ForeignKey('question.Answer',on_delete=models.CASCADE,verbose_name='回答')

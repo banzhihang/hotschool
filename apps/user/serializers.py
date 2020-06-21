@@ -1,6 +1,8 @@
 import os
 
 from rest_framework import serializers
+
+from HotSchool.settings import domain_name
 from question.models import *
 from HotSchool import settings
 from question.serializers import AnswerInfoSerializer
@@ -113,33 +115,20 @@ class UpdateUserInfoSerializer(serializers.ModelSerializer):
                     'college','major','grade','campus','interest']
 
 
-class UserRecentBrowseQuestionSerializer(serializers.ModelSerializer):
-    """最近浏览问题序列化器"""
-    add_time = serializers.DateTimeField(format='%Y-%m-%d %H:%M')
-    question = serializers.SerializerMethodField()
-
-    def get_question(self, obj):
-        quetion = Question.objects.filter(pk=obj.question_id).first()
-        return UserQuestionCollectSerializer(instance=quetion,
-                                             context={'request':self.context['request']}).data
-
-    class Meta:
-        model = RecentBrowseQuestion
-        fields = ['add_time', 'question']
-
-
 class UserRecentBrowseAnswerSerializer(serializers.ModelSerializer):
     """最近浏览回答序列化器"""
     add_time = serializers.DateTimeField(format='%Y-%m-%d %H:%M')
-    answer = serializers.SerializerMethodField()
-
-    def get_answer(self, obj):
-        answer = Answer.objects.filter(pk=obj.answer_id).first()
-        return AnswerInfoSerializer(instance=answer,context={'request':self.context['request']}).data
+    answer = serializers.IntegerField(source='answer.id')
+    content = serializers.CharField(source='answer.content')
+    user_nick_name = serializers.CharField(source='answer.user.nick_name')
+    approval_number = serializers.IntegerField(source='answer.approval_number')
+    comment_number = serializers.IntegerField(source='answer.comment_number')
+    question_title = serializers.CharField(source='answer.question.title')
 
     class Meta:
         model = RecentBrowseAnswer
-        fields = ['add_time', 'answer']
+        fields = ['add_time', 'answer', 'user_nick_name', 'approval_number',
+                  'comment_number','content','question_title']
 
 
 class UserAttentionSerializer(serializers.ModelSerializer):
@@ -154,6 +143,29 @@ class UserQuestionCollectSerializer(serializers.ModelSerializer):
     class Meta:
         model = Question
         fields = ['id', 'title','answer_number','attention_number']
+
+class UserAnswerCollectSerializer(serializers.ModelSerializer):
+    """用户收藏的回答序列化器"""
+    user_head_portrait = serializers.SerializerMethodField()
+    user_nick_name = serializers.SerializerMethodField()
+    question_title = serializers.CharField(source='question.title')
+
+    def get_user_head_portrait(self,answer):
+        if answer.is_anonymity == 1:
+            path = domain_name + '/media/headimage/anonymity.jpg'
+            return path
+        else:
+            return domain_name + answer.user.head_portrait.url
+
+    def get_user_nick_name(self, answer):
+        if answer.is_anonymity == 1:
+            return '匿名用户'
+        else:
+            return answer.user.nick_name
+
+    class Meta:
+        model = Answer
+        fields = ['id','question_title','user_head_portrait','user_nick_name','approval_number','comment_number']
 
 class UserRevertInfoSerializer(serializers.ModelSerializer):
     """用户的回复信息序列化"""
@@ -173,6 +185,17 @@ class UserRevertInfoSerializer(serializers.ModelSerializer):
                   'question_title','content','approval_number','add_time']
 
 
+class UserAnswerInfoSerializer(serializers.ModelSerializer):
+    """用户回答信息序列化"""
+    user_nick_name = serializers.CharField(source='user.nick_name')
+    question_title = serializers.CharField(source='question.title')
+    user_head_portrait = serializers.ImageField(source='user.head_portrait')
+
+
+    class Meta:
+        model = Answer
+        fields = ['id','user_nick_name','approval_number',
+                  'comment_number','content','user_head_portrait','question_title']
 
 
 

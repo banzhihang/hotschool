@@ -34,14 +34,27 @@ ALLOWED_HOSTS = ['*']
 
 REST_FRAMEWORK = {
 }
+
+# channel设置
+ASGI_APPLICATION = 'HotSchool.routing.application'
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "hosts": [('127.0.0.1', 6379)],
+        },
+    },
+}
+
 # jwt过期时间
 JWT_AUTH = {
-    'JWT_EXPIRATION_DELTA': timedelta(days=10)
+    'JWT_EXPIRATION_DELTA': timedelta(days=1000)
 }
 
 # Application definition
 
 INSTALLED_APPS = [
+    'channels',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -52,7 +65,8 @@ INSTALLED_APPS = [
     'rest_framework',
     'user',
     'question',
-    'operation'
+    'operation',
+    'communicate',
 ]
 
 AUTH_USER_MODEL = 'user.User'
@@ -100,6 +114,18 @@ DATABASES = {
         'HOST': '127.0.0.1'
     }
 }
+
+# Django的缓存配置
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://127.0.0.1:6379/1",
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        }
+    }
+}
+
 
 # Password validation
 # https://docs.djangoproject.com/en/2.2/ref/settings/#auth-password-validators
