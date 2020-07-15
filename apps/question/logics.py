@@ -41,36 +41,6 @@ def get_hot_question(campus, college, grade, time_slot_type):
     return questions
 
 
-def get_question_info(question_id, type):
-    """获取问题详情"""
-    # 去Question表查询问题
-    question = Question.objects.get(pk=question_id)
-
-    # 用question_id 和type(0为默认排序,1为按时间排序)去Answer表查询回答，并根据score或者添加时间 排序
-    if type == 0:
-        answers = Answer.objects.filter(question=question_id).order_by('-score')
-    else:
-        answers = Answer.objects.filter(question=question_id).order_by('-add_time')
-
-    return question, answers
-
-
-def get_comment(answer_id, comment_type, question_id):
-    """获取评论
-    参数：问题id或者回答id,comment_id
-    返回值：评论列表
-    """
-    comment_type = int(comment_type)
-    # comment_type为0，代表为回答评论,为1,代表为问题评论
-    if comment_type == 0:
-        comments = Comment.objects.filter(answer=answer_id, type=comment_type).order_by('modify_time')
-        comments = [model_to_dict(comment) for comment in comments]
-    else:
-        comments = Comment.objects.filter(question=question_id, type=comment_type).order_by('modify_time')
-        comments = [model_to_dict(comment) for comment in comments]
-
-    return comments
-
 
 def get_revert(comment_id):
     """

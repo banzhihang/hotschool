@@ -46,17 +46,28 @@
 #         fields = ['add_time', 'answer','user_nick_name','approval_number',
 #                   'comment_number','question_title']
 
-from django_redis import get_redis_connection
+# from django_redis import get_redis_connection
+#
+# coon = get_redis_connection()
+# coon.hset('user','user1','15')
+# coon.hset('user','user2','15')
+# coon.hset('book','price','1259')
+#
+# a = coon.hget('user','user1')
+# b = coon.hget('user','user2')
+# c = coon.hget('book','price','1259')
+#
+# coon.hdel('user','user1')
+# coon.hdel('user','user2')
+# coon.hdel('book','price')
 
-coon = get_redis_connection()
-coon.hset('user','user1','15')
-coon.hset('user','user2','15')
-coon.hset('book','price','1259')
+from socket import *
+serverName = '192.168.31.202'
+serverPort = 12000
+clientSocket = socket(AF_INET,SOCK_STREAM)
+clientSocket.connect((serverName,serverPort))
+message = input("请输入：")
+clientSocket.send(message.encode())
+modifiedMessage = clientSocket.recv(1024)
+print(modifiedMessage.decode())
 
-a = coon.hget('user','user1')
-b = coon.hget('user','user2')
-c = coon.hget('book','price','1259')
-
-coon.hdel('user','user1')
-coon.hdel('user','user2')
-coon.hdel('book','price')

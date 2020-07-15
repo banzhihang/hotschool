@@ -50,7 +50,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         # 判断用户是否在线，在线就直接发送消息，不在线就将消息存入redis的有序集合中,有序集和的排序根据时间戳排序
         coon = get_redis_connection()
         to_user_channel_name = coon.get('user:connect:'+str(to_user))
-        if to_user_channel_name is not None:
+        if to_user_channel_name :
             await self.channel_layer.send(
                 to_user_channel_name.decode(),
                 {

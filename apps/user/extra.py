@@ -1,18 +1,22 @@
 import re
 from collections import OrderedDict
 from io import BytesIO
+
+import redis
 import requests
 import random, string
 
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from rest_framework import exceptions
 from rest_framework.authentication import BasicAuthentication
-from rest_framework.pagination import CursorPagination
+from rest_framework.pagination import CursorPagination, PageNumberPagination
 from rest_framework.response import Response
 from rest_framework_jwt.authentication import jwt_decode_handler
 from rest_framework_jwt.utils import jwt_get_user_id_from_payload_handler
 
 from user.models import User
+
+POOL = redis.ConnectionPool(host='127.0.0.1', port=6379,db=1,decode_responses=True)
 
 def random_string(slen=30): #截取长度不能超过指定序列的长度
     # 产生随机字符串，当作图片的名字
@@ -31,7 +35,6 @@ def modify_image_name(request):
         path = random_string() + '.' + tail[0]
         request.data.get('head_portrait').name = path
         return request
-
 
 
 class OpenIdAndImage:
@@ -63,7 +66,7 @@ class OpenIdAndImage:
             image = InMemoryUploadedFile(image, None, random_string()
                                          +'.'+tail[0], None, len(res3), None, None)
         except:
-            Response({"msg": "登录失败"})
+            return Response({"msg": "登录失败"})
         else:
             return openid,image
 
@@ -77,12 +80,10 @@ class Authtication(BasicAuthentication):
         # token不存在
         if token is None:
             raise exceptions.AuthenticationFailed('未登录')
-
         try:
             # 解析token,若出现异常，则说明token被篡改过，属于非法
             payload = jwt_decode_handler(token)
-
-        except Exception as e:
+        except Exception:
             raise exceptions.AuthenticationFailed('用户异常')
 
         # 获得用户id
@@ -94,16 +95,15 @@ class Authtication(BasicAuthentication):
         else:
             return user, None
 
+
 class MyCursorPagination(CursorPagination):
-    """自定义分页类"""
-    # url中页码参数
-    cursor_query_param = 'cursor'
+    """自定义分页类( 以添加时间排序的情况)
+    用户回答,评论，回复，动态
+    """
     # 每页默认数量
-    page_size = 2
+    page_size = 10
     # 排序规则
     ordering = '-add_time'
-    # 控制每页显示数量的参数名
-    page_size_query_param = 'size'
     # 每页最大显示数量
     max_page_size = 20
 
@@ -112,4 +112,28 @@ class MyCursorPagination(CursorPagination):
         return Response(OrderedDict([
             ('next', self.get_next_link()),
             ('results', data)
-        ]))
+        ]),)
+
+
+class RecentPagination(PageNumberPagination):
+    """自定义分页类(最近浏览记录)"""
+    # 每页默认数量
+    page_size = 1
+    # 每页最大显示数量
+    max_page_size = 50
+
+    # 自定义返回格式
+    def get_paginated_response(self, data):
+        return Response(OrderedDict([
+            ('next', self.get_next_link()),
+            ('results', data)
+        ]),)
+
+
+def get_ordering(answer_id):
+    # 生成排序条件
+    condition_list = ['WHEN id = % s THEN % s' % (pk, index) for index, pk in enumerate(answer_id)]
+    condition = ' '.join(condition_list)
+    ordering = 'CASE %s END' % condition
+
+    return ordering

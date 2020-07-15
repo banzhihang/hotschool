@@ -13,8 +13,7 @@
 <script>
     var token = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoxLCJ1c2VybmFtZSI6Ilx1NzNlZFx1NmNiYlx1Njc2ZCIsImV4cCI6MTY3ODkyOTgwNiwiZW1haWwiOiIyNTgxMTIzODA1QHFxLmNvbSJ9.BSfBmq06BOpUGnJ4e1a2kqYlx5NuS95AeYOLUtAQVAk'
     var chatSocket = new WebSocket(
-        'ws://' + window.location.host +
-        '/ws/chat?'+token);
+        'ws://' + window.location.host + '/ws/chat?'+token);
 
     chatSocket.onmessage = function(e) {
         var data = JSON.parse(e.data);

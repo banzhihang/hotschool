@@ -1,12 +1,8 @@
 import json
 
-from django.shortcuts import render
-
-from django.shortcuts import render
 from django.http import HttpResponse
 from django.views.generic.base import View
 
-from question.views import JsonToDatetime
 from .logics import *
 
 

@@ -1,13 +1,15 @@
+import redis
 from rest_framework import serializers
 
 from HotSchool.settings import domain_name
+from user.extra import POOL
 from .models import *
 
 
 class QuestionInfoSerializer(serializers.ModelSerializer):
     """问题信息序列化"""
     add_time = serializers.DateField(format='%Y-%m-%d')
-    modify_time = serializers.DateTimeField(format='%Y-%m-%d %H:%M:%S')
+    modify_time = serializers.DateTimeField(format='%Y-%m-%d %H:%M')
     interest_circle = serializers.SerializerMethodField()
 
     def get_interest_circle(self,obj):
@@ -23,8 +25,8 @@ class QuestionInfoSerializer(serializers.ModelSerializer):
 
 class AnswerInfoSerializer(serializers.ModelSerializer):
     """回答信息序列化"""
-    add_time = serializers.DateTimeField(format='%Y-%m-%d %H:%M:%S')
-    modify_time = serializers.DateTimeField(format='%Y-%m-%d %H:%M:%S')
+    add_time = serializers.DateTimeField(format='%Y-%m-%d %H:%M')
+    modify_time = serializers.DateTimeField(format='%Y-%m-%d %H:%M')
     user_head_portrait = serializers.SerializerMethodField()
     user = serializers.SerializerMethodField()
     user_nick_name = serializers.SerializerMethodField()
@@ -60,37 +62,43 @@ class AnswerInfoSerializer(serializers.ModelSerializer):
             return answer.user.desc
 
     def get_is_approval(self,answer):
+        # 判断用户对该问题的赞同情况,1为喜欢,0为不喜欢,2为未表态
         user_id = self.context['request'].user.pk
         is_approval = ApprovalAnswerRelation.objects.filter(user=user_id,answer=answer.pk).values_list('type')
-        if is_approval:
+        if is_approval.exists():
             if is_approval[0][0] == 0:
-                return '赞同'
+                return 1
             else:
-                return '反对'
+                return 0
         else:
-            return '未表态'
+            return 2
     def get_is_like(self,answer):
+        # 判断该用户对该问题的喜欢情况,1为喜欢，0为未喜欢
         user_id = self.context['request'].user.pk
-        is_like = LikeRelation.objects.filter(user=user_id,answer=answer.pk).values_list()
+        coon = redis.Redis(connection_pool=POOL)
+        is_like = coon.sismember('user:answer:like:'+str(user_id), answer.pk)
         if is_like:
-            return '已喜欢'
+            return 1
         else:
-            return '未喜欢'
+            return 0
 
     def get_is_collect(self,answer):
+        # 判断该用户对该问题收藏情况
         user_id = self.context['request'].user.pk
-        is_collect = CollectRelation.objects.filter(user=user_id, answer=answer.pk).values_list()
+        coon = redis.Redis(connection_pool=POOL)
+        is_collect = coon.sismember('user:answer:collect:'+str(user_id), answer.pk)
         if is_collect:
-            return '已收藏'
+            return 1
         else:
-            return '未收藏'
+            return 0
     def get_is_attention_user(self,answer):
         user_id = self.context['request'].user.pk
-        is_collect = AttentionRelation.objects.filter(user=user_id, target_user=answer.user_id).values_list()
-        if is_collect:
-            return '已关注'
+        coon = redis.Redis(connection_pool=POOL)
+        is_attention = coon.sismember('user:attention:'+str(user_id), answer.user_id)
+        if is_attention:
+            return 1
         else:
-            return '未关注'
+            return 0
 
     class Meta:
         model = Answer
@@ -103,13 +111,22 @@ class CommentInfoSerializer(serializers.ModelSerializer):
     user = serializers.IntegerField(source='user.pk')
     user_nick_name = serializers.CharField(source='user.nick_name')
     user_head_portrait = serializers.ImageField(source='user.head_portrait')
+    is_approval = serializers.SerializerMethodField()
 
-
+    # 判断用户是否赞同该评论
+    def get_is_approval(self,comment):
+        user_id = self.context['request'].user.pk
+        coon = redis.Redis(connection_pool=POOL)
+        is_approval = coon.sismember('user:comment:approval:' + str(user_id), comment.id)
+        if is_approval:
+            return 1
+        else:
+            return 0
 
     class Meta:
         model = Comment
         fields = ['id','user','user_nick_name','user_head_portrait',
-                  'content','approval_number','add_time']
+                  'content','is_approval','approval_number','add_time']
 
 
 class RevertInfoSerializer(serializers.ModelSerializer):
@@ -120,8 +137,38 @@ class RevertInfoSerializer(serializers.ModelSerializer):
     user_head_portrait = serializers.ImageField(source='user.head_portrait')
     target_user_nick_name = serializers.CharField(source='target_user.nick_name')
     target_user = serializers.IntegerField(source='target_user.pk')
+    is_approval = serializers.SerializerMethodField()
+
+    # 判断用户是否赞同该回复
+    def get_is_approval(self, comment):
+        user_id = self.context['request'].user.pk
+        coon = redis.Redis(connection_pool=POOL)
+        is_approval = coon.sismember('user:revert:approval:' + str(user_id), comment.id)
+        if is_approval:
+            return 1
+        else:
+            return 0
 
     class Meta:
         model = Revert
-        fields = ['id','user','user_nick_name','target_user',
+        fields = ['id','user','user_nick_name','target_user','is_approval',
                   'target_user_nick_name','user_head_portrait','content','approval_number','add_time']
+
+
+class AnswerBriefSerializer(serializers.ModelSerializer):
+    """回答简短信息序列化器"""
+    user_nick_name = serializers.CharField(source='user.nick_name')
+    user_head_portrait = serializers.ImageField(source='user.head_portrait')
+    modify_time = serializers.DateTimeField(format='%Y-%m-%d %H:%M:%S')
+
+    class Meta:
+        model = Answer
+        fields = ['id','user_nick_name','user_head_portrait',
+                  'modify_time','content','approval_number','comment_number','like_number']
+
+
+class HotQuestionSerializer(serializers.ModelSerializer):
+    """热榜问题序列化器"""
+    class Meta:
+        model = Question
+        fields = ['title','id','school']

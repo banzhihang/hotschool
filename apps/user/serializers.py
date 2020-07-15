@@ -1,24 +1,24 @@
 import os
 
+import redis
 from rest_framework import serializers
 
 from HotSchool.settings import domain_name
 from question.models import *
 from HotSchool import settings
-from question.serializers import AnswerInfoSerializer
+from question.serializers import AnswerBriefSerializer
+from user.extra import POOL
 from user.models import *
 
 
 class UserInfoSerializer(serializers.ModelSerializer):
     """用户数据序列化器"""
     nick_name = serializers.CharField()
-    phone = serializers.CharField()
-    desc = serializers.CharField()
-    campus = serializers.CharField(source='campus.name')
-    college = serializers.CharField(source='college.name')
-    major = serializers.CharField(source='major.name')
-    grade = serializers.IntegerField(source='grade.grade')
-    interests = serializers.SerializerMethodField(read_only=True)
+    phone = serializers.CharField(default='')
+    desc = serializers.CharField(default='')
+    campus = serializers.CharField(source='campus.name',default='')
+    school = serializers.CharField(source='school.name',default='')
+    interests = serializers.SerializerMethodField(read_only=True,default='')
     add_time = serializers.DateField(format='%Y-%m-%d',read_only=True)
 
     def get_interests(self, user):
@@ -29,8 +29,8 @@ class UserInfoSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['id','nick_name', 'head_portrait', 'phone', 'desc','campus', 'college',
-                  'major', 'grade', 'add_time', 'interests']
+        fields = ['id','nick_name', 'head_portrait', 'phone', 'desc','campus', 'school',
+                   'add_time', 'interests']
 
 
 class UpdateUserInfoSerializer(serializers.ModelSerializer):
@@ -47,30 +47,21 @@ class UpdateUserInfoSerializer(serializers.ModelSerializer):
         'min_length': '个人描述最低5个字符',
         'max_length': '个人描述最大30字符'})
     campus = serializers.CharField(required=False)
-    college = serializers.CharField(required=False)
-    major = serializers.CharField(required=False)
-    grade = serializers.IntegerField(required=False)
+    school = serializers.CharField(required=False)
     interest = serializers.CharField(required=False)
 
 
     def validate(self, attrs):
-        campus = attrs.get('campus', None)
-        college = attrs.get('college', None)
-        major = attrs.get('major', None)
-        grade = attrs.get('grade', None)
-        interest = attrs.get('interest',None)
+        school = attrs.get('school')
+        campus = attrs.get('campus')
+        interest = attrs.get('interest')
+
+        if school:
+            school_id = School.objects.filter(name=school).values_list('id')[0][0]
+            attrs['school'] = school_id
         if campus:
             campus_id = Campus.objects.filter(name=campus).values_list('id')[0][0]
             attrs['campus'] = campus_id
-        if college:
-            college_id = College.objects.filter(name=college).values_list('id')[0][0]
-            attrs['college'] = college_id
-        if major:
-            major_id = Major.objects.filter(name=major).values_list('id')[0][0]
-            attrs['major'] = major_id
-        if grade:
-            grade_id = Grade.objects.filter(grade=int(grade)).values_list('id')[0][0]
-            attrs['grade'] = grade_id
         if interest:
             interest = interest.split(',')
             interests_id = Interest.objects.filter(name__in=interest).values_list('id')
@@ -112,22 +103,17 @@ class UpdateUserInfoSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['nick_name','head_portrait','phone','desc',
-                    'college','major','grade','campus','interest']
+                    'school','campus','interest']
 
 
 class UserRecentBrowseAnswerSerializer(serializers.ModelSerializer):
     """最近浏览回答序列化器"""
-    add_time = serializers.DateTimeField(format='%Y-%m-%d %H:%M')
-    answer = serializers.IntegerField(source='answer.id')
-    content = serializers.CharField(source='answer.content')
-    user_nick_name = serializers.CharField(source='answer.user.nick_name')
-    approval_number = serializers.IntegerField(source='answer.approval_number')
-    comment_number = serializers.IntegerField(source='answer.comment_number')
-    question_title = serializers.CharField(source='answer.question.title')
+    user_nick_name = serializers.CharField(source='user.nick_name')
+    question_title = serializers.CharField(source='question.title')
 
     class Meta:
-        model = RecentBrowseAnswer
-        fields = ['add_time', 'answer', 'user_nick_name', 'approval_number',
+        model = Answer
+        fields = ['id', 'user_nick_name', 'approval_number',
                   'comment_number','content','question_title']
 
 
@@ -143,6 +129,7 @@ class UserQuestionCollectSerializer(serializers.ModelSerializer):
     class Meta:
         model = Question
         fields = ['id', 'title','answer_number','attention_number']
+
 
 class UserAnswerCollectSerializer(serializers.ModelSerializer):
     """用户收藏的回答序列化器"""
@@ -165,7 +152,9 @@ class UserAnswerCollectSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Answer
-        fields = ['id','question_title','user_head_portrait','user_nick_name','approval_number','comment_number']
+        fields = ['id','question_title','user_head_portrait',
+                  'user_nick_name','approval_number','comment_number']
+
 
 class UserRevertInfoSerializer(serializers.ModelSerializer):
     """用户的回复信息序列化"""
@@ -197,5 +186,57 @@ class UserAnswerInfoSerializer(serializers.ModelSerializer):
         fields = ['id','user_nick_name','approval_number',
                   'comment_number','content','user_head_portrait','question_title']
 
+
+class UserInfoShowSerializer(serializers.ModelSerializer):
+    """用户信息展示序列化器"""
+    nick_name = serializers.CharField(source='user.nick_name')
+    desc = serializers.CharField(source='user.desc',default='')
+    head_portrait = serializers.ImageField(source='user.head_portrait')
+    collect_user_number = serializers.SerializerMethodField()
+    user_be_collect_number = serializers.SerializerMethodField()
+
+    def get_collect_user_number(self,obj):
+        # 从redis获取关注用户的人的数量
+        coon = redis.Redis(connection_pool=POOL)
+        number = coon.scard('user:beattention:'+str(obj.user_id))
+        return number
+
+    def get_user_be_collect_number(self,obj):
+        # 从redis获取用户关注的人的数量
+        coon = redis.Redis(connection_pool=POOL)
+        number = coon.scard('user:attention:' + str(obj.user_id))
+        return number
+
+    class Meta:
+        model = UserData
+        fields = ['user','nick_name','desc','head_portrait','collect_user_number','user_be_collect_number',
+                  'approval_number','like_number','collect_number','read_number']
+
+class UserDynamicSerializer(serializers.ModelSerializer):
+    """用户动态序列化器"""
+    type = serializers.IntegerField()
+    add_time = serializers.DateTimeField(format='%Y-%m-%d %H:%M')
+    content = serializers.SerializerMethodField()
+
+    def get_content(self,obj):
+        if obj.type in [1,2,3]:
+            content = UserDynamicAnswerSerializer(instance=obj.answer)
+        else:
+            content = UserQuestionCollectSerializer(instance=obj.question)
+        return content.data
+
+    class Meta:
+        model = UserDynamic
+        fields = ['type','add_time','content',]
+
+
+class UserDynamicAnswerSerializer(serializers.ModelSerializer):
+    """用户动态回答序列化器"""
+    question_title = serializers.CharField(source='question.title')
+    user_nick_name = serializers.CharField(source='user.nick_name')
+
+    class Meta:
+        model = Answer
+        fields = ['id','question_title','user_nick_name','approval_number','comment_number','content']
 
 
