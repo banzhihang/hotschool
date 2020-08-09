@@ -1,28 +1,26 @@
+import json
 import re
-from collections import OrderedDict
+import time
+import uuid
 from io import BytesIO
-
-import redis
 import requests
-import random, string
 
 from django.core.files.uploadedfile import InMemoryUploadedFile
-from rest_framework import exceptions
-from rest_framework.authentication import BasicAuthentication
-from rest_framework.pagination import CursorPagination, PageNumberPagination
 from rest_framework.response import Response
-from rest_framework_jwt.authentication import jwt_decode_handler
-from rest_framework_jwt.utils import jwt_get_user_id_from_payload_handler
+import redis
 
-from user.models import User
+from HotSchool.settings import POOL
+from question.models import Answer, Question
+from user.models import User, UserDynamic
 
-POOL = redis.ConnectionPool(host='127.0.0.1', port=6379,db=1,decode_responses=True)
 
-def random_string(slen=30): #截取长度不能超过指定序列的长度
-    # 产生随机字符串，当作图片的名字
-    return ''.join(random.sample(string.ascii_letters + string.digits + '@#$%&', slen))
+def uuid_string():
+    # 产生uuid字符串，当作图片的名字
+    str_timestamp = time.time()
+    return str(uuid.uuid3(uuid.NAMESPACE_DNS, str_timestamp)).replace('-','') # 去掉破折号
 
-def modify_image_name(request):
+
+def modify_headimage_name(request):
     # 修改图片的名字，解决了不能上传含有中文名的图片的问题.使用正则表达式匹配图片的content_type,获得图片的格式
     # 使用随机字符串代替原始图片名
     try:
@@ -32,7 +30,7 @@ def modify_image_name(request):
     else:
         pattern = re.compile('[^/]+$')
         tail = re.findall(pattern, img_type)
-        path = random_string() + '.' + tail[0]
+        path = uuid_string() + '.' + tail[0]
         request.data.get('head_portrait').name = path
         return request
 
@@ -40,7 +38,7 @@ def modify_image_name(request):
 class OpenIdAndImage:
     """获取openid和用户微信头像"""
 
-    def __init__(self, code,image_url):
+    def __init__(self, code, image_url):
         self.openid_url = 'https://api.weixin.qq.com/sns/jscode2session'
         # 头像地址
         self.img_url = image_url
@@ -49,7 +47,7 @@ class OpenIdAndImage:
         self.code = code
 
     def get_openid_image(self):
-        openid_url = self.openid_url + "?appid=" + self.app_id + "&secret=" + self.app_secret +\
+        openid_url = self.openid_url + "?appid=" + self.app_id + "&secret=" + self.app_secret + \
                      "&js_code=" + self.code + "&grant_type=authorization_code"
         res1 = requests.get(openid_url)
         res2 = requests.get(self.img_url)
@@ -63,77 +61,60 @@ class OpenIdAndImage:
             pattern = re.compile('[^/]+$')
             # 获得图像格式
             tail = re.findall(pattern, image_type)
-            image = InMemoryUploadedFile(image, None, random_string()
-                                         +'.'+tail[0], None, len(res3), None, None)
+            image = InMemoryUploadedFile(image, None, uuid_string()
+                                         + '.' + tail[0], None, len(res3), None, None)
         except:
             return Response({"msg": "登录失败"})
         else:
-            return openid,image
+            return openid, image
 
 
-class Authtication(BasicAuthentication):
-    """自定义用户认证"""
-
-    def authenticate(self, request):
-        # 获取token
-        token = request.META.get('HTTP_AUTHORIZATION', None)
-        # token不存在
-        if token is None:
-            raise exceptions.AuthenticationFailed('未登录')
-        try:
-            # 解析token,若出现异常，则说明token被篡改过，属于非法
-            payload = jwt_decode_handler(token)
-        except Exception:
-            raise exceptions.AuthenticationFailed('用户异常')
-
-        # 获得用户id
-        user_id = jwt_get_user_id_from_payload_handler(payload)
-        try:
-            user = User.objects.get(pk=user_id)
-        except Exception:
-            raise exceptions.AuthenticationFailed('没有该用户')
-        else:
-            return user, None
-
-
-class MyCursorPagination(CursorPagination):
-    """自定义分页类( 以添加时间排序的情况)
-    用户回答,评论，回复，动态
+def create_user_dynamic(user_id, ):
     """
-    # 每页默认数量
-    page_size = 10
-    # 排序规则
-    ordering = '-add_time'
-    # 每页最大显示数量
-    max_page_size = 20
-
-    # 自定义返回格式
-    def get_paginated_response(self, data):
-        return Response(OrderedDict([
-            ('next', self.get_next_link()),
-            ('results', data)
-        ]),)
-
-
-class RecentPagination(PageNumberPagination):
-    """自定义分页类(最近浏览记录)"""
-    # 每页默认数量
-    page_size = 1
-    # 每页最大显示数量
-    max_page_size = 50
-
-    # 自定义返回格式
-    def get_paginated_response(self, data):
-        return Response(OrderedDict([
-            ('next', self.get_next_link()),
-            ('results', data)
-        ]),)
-
-
-def get_ordering(answer_id):
-    # 生成排序条件
-    condition_list = ['WHEN id = % s THEN % s' % (pk, index) for index, pk in enumerate(answer_id)]
-    condition = ' '.join(condition_list)
-    ordering = 'CASE %s END' % condition
-
-    return ordering
+    :param user: 动态所属用户
+    :param answer:动态所属回答
+    :param question:动态所属问题
+    """
+    user_id = int(user_id)
+    coon = redis.Redis(connection_pool=POOL)
+    is_exist = coon.exists('dynamic:' + str(user_id))
+    if is_exist:
+        # 去redis 查询这个人的动态，若有，则先同步此人的动态到数据库,再从数据库查询此人的全部动态
+        user_dynamic_list = coon.zrange('dynamic:' + str(user_id), start=0, end=-1, withscores=True)
+        if user_dynamic_list:
+            coon.delete('dynamic:' + str(user_id))
+            # 查询有没有这个人
+            try:
+                user = User.objects.get(pk=user_id)
+            except Exception:
+                return Response({'error': '没有此人'})
+            else:
+                dynamics = []
+                for i in user_dynamic_list:
+                    # 反序列化用户动态的json数据 不含时间戳
+                    dynamic = json.loads(i[0])
+                    answer_id = dynamic.get('answer')
+                    question_id = dynamic.get('question')
+                    # 判断该动态是问题相关还是回答相关
+                    if answer_id:
+                        answer = Answer.objects.filter(pk=answer_id)
+                        # 若不存在该id 则抛弃这条动态
+                        if answer.exists():
+                            dynamic['answer_id'] = int(answer_id)
+                            dynamic.pop('answer')
+                        else:
+                            continue
+                    if question_id:
+                        question = Question.objects.filter(pk=question_id)
+                        if question.exists():
+                            dynamic['question_id'] = int(question_id)
+                            dynamic.pop('question')
+                        else:
+                            continue
+                    # 将时间戳添加到dynamic字典，创建dynamic对象，最后批量插入数据库
+                    dynamic['add_time'] = float(i[1])
+                    dynamic['user'] = user
+                    j = UserDynamic(**dynamic)
+                    dynamics.append(j)
+            # 批量插入
+            UserDynamic.objects.bulk_create(dynamics)

@@ -1,0 +1,1 @@
+{{ object.nick_name }}

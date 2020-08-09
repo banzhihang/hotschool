@@ -17,7 +17,9 @@ urlpatterns = [
     path('question', MyQuestionView.as_view()),
     # 用户收藏
     path('collect', MyCollectView.as_view()),
-    # 用户关注
-    path('attention', MyAttentionView.as_view()),
+    # 我的关注
+    path('myattention', MyAttentionView.as_view()),
+    # 用户关注和被关注
+    path('attention/<int:user_id>',UserAttention.as_view())
 
 ]

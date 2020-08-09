@@ -36,11 +36,11 @@
     document.querySelector('#chat-message-submit').onclick = function(e) {
         var messageInputDom = document.querySelector('#chat-message-input');
         var message = messageInputDom.value;
-        time
+        var time = new Date().getTime();
         chatSocket.send(JSON.stringify({
             'message': message,
             'to_user':1,
-            'time':'2020.06.06.17:35',
+            'time':time,
         }));
 
         messageInputDom.value = '';

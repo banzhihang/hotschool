@@ -12,6 +12,7 @@ def room(request):
 def room2(request):
     return render(request, 'chat/room2.html')
 
+
 class HeadAndNickName(APIView):
     """获得用户的昵称和头像"""
     def get(self,request):

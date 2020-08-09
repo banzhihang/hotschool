@@ -18,23 +18,33 @@ from django.urls import path, include, re_path
 from django.views.static import serve
 
 from HotSchool import settings
+from question.views import QuestionView
+from upload.views import UploadTokenView
+
 from user.views import LoginView
+
 
 urlpatterns = [
     # 管理员
     path('admin/', admin.site.urls),
-    # api管理员
-    path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     # 身份认证
-    path('login/',LoginView.as_view()),
+    path('login',LoginView.as_view()),
     # 媒体文件
     re_path(r'media/(?P<path>.*)$',serve,{'document_root':settings.MEDIA_ROOT}),
     # 用户相关
     path('user/', include('user.urls'), name='user'),
-    # 问题相关
+    # 问题的回答评论回复相关
     path('question/', include('question.urls'), name='question'),
+    # 问题
+    path('question',QuestionView.as_view()),
     # 操作相关
-    path('operation/', include('operation.urls'), name='question'),
+    path('operation/', include('operation.urls'), name='operation'),
+    # 美食相关
+    path('food/', include('food.urls'), name='food'),
     # 聊天相关
-    path('chat/', include('communicate.urls'))
+    path('chat/', include('communicate.urls')),
+    # 搜索
+    path('search/', include('search.urls')),
+    # 上传图片
+    path('upload',UploadTokenView.as_view())
 ]

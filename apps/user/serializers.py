@@ -1,13 +1,12 @@
 import os
+import time
 
 import redis
 from rest_framework import serializers
 
-from HotSchool.settings import domain_name
+from HotSchool.settings import domain_name, POOL
 from question.models import *
 from HotSchool import settings
-from question.serializers import AnswerBriefSerializer
-from user.extra import POOL
 from user.models import *
 
 
@@ -16,7 +15,6 @@ class UserInfoSerializer(serializers.ModelSerializer):
     nick_name = serializers.CharField()
     phone = serializers.CharField(default='')
     desc = serializers.CharField(default='')
-    campus = serializers.CharField(source='campus.name',default='')
     school = serializers.CharField(source='school.name',default='')
     interests = serializers.SerializerMethodField(read_only=True,default='')
     add_time = serializers.DateField(format='%Y-%m-%d',read_only=True)
@@ -29,12 +27,15 @@ class UserInfoSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['id','nick_name', 'head_portrait', 'phone', 'desc','campus', 'school',
+        fields = ['id','nick_name', 'head_portrait', 'phone', 'desc', 'school',
                    'add_time', 'interests']
 
 
 class UpdateUserInfoSerializer(serializers.ModelSerializer):
-    """用户提交信息序列化器"""
+    """
+    用户提交信息序列化器
+    必须字段:无,选要字段:nick_name,phone,desc,school,interest,interest(例子:1,2),
+    """
     nick_name = serializers.CharField(min_length=2, max_length=10, required=False, error_messages={
         'min_length': '昵称最低2个字符',
         'max_length': '昵称最大10字符'
@@ -46,22 +47,18 @@ class UpdateUserInfoSerializer(serializers.ModelSerializer):
     desc = serializers.CharField(min_length=5, max_length=30, required=False, error_messages={
         'min_length': '个人描述最低5个字符',
         'max_length': '个人描述最大30字符'})
-    campus = serializers.CharField(required=False)
-    school = serializers.CharField(required=False)
-    interest = serializers.CharField(required=False)
+    school = serializers.IntegerField(required=False)
+    interest = serializers.IntegerField(required=False)
 
 
     def validate(self, attrs):
         school = attrs.get('school')
-        campus = attrs.get('campus')
         interest = attrs.get('interest')
 
         if school:
-            school_id = School.objects.filter(name=school).values_list('id')[0][0]
-            attrs['school'] = school_id
-        if campus:
-            campus_id = Campus.objects.filter(name=campus).values_list('id')[0][0]
-            attrs['campus'] = campus_id
+            attrs['school_id'] = int(school)
+            attrs.pop('school')
+
         if interest:
             interest = interest.split(',')
             interests_id = Interest.objects.filter(name__in=interest).values_list('id')
@@ -103,7 +100,7 @@ class UpdateUserInfoSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['nick_name','head_portrait','phone','desc',
-                    'school','campus','interest']
+                    'school','interest']
 
 
 class UserRecentBrowseAnswerSerializer(serializers.ModelSerializer):
@@ -198,13 +195,14 @@ class UserInfoShowSerializer(serializers.ModelSerializer):
     def get_collect_user_number(self,obj):
         # 从redis获取关注用户的人的数量
         coon = redis.Redis(connection_pool=POOL)
-        number = coon.scard('user:beattention:'+str(obj.user_id))
+        # scard方法 若没有检测到该键，则返回0
+        number = coon.scard('beattention:'+str(obj.user_id))
         return number
 
     def get_user_be_collect_number(self,obj):
         # 从redis获取用户关注的人的数量
         coon = redis.Redis(connection_pool=POOL)
-        number = coon.scard('user:attention:' + str(obj.user_id))
+        number = coon.scard('attention:' + str(obj.user_id))
         return number
 
     class Meta:
@@ -215,15 +213,20 @@ class UserInfoShowSerializer(serializers.ModelSerializer):
 class UserDynamicSerializer(serializers.ModelSerializer):
     """用户动态序列化器"""
     type = serializers.IntegerField()
-    add_time = serializers.DateTimeField(format='%Y-%m-%d %H:%M')
+    add_time = serializers.SerializerMethodField()
     content = serializers.SerializerMethodField()
 
     def get_content(self,obj):
-        if obj.type in [1,2,3]:
+        # 若type在1，2，3里面，则序列化回答，否则序列化问题
+        if obj.type in [0,1,2]:
             content = UserDynamicAnswerSerializer(instance=obj.answer)
         else:
             content = UserQuestionCollectSerializer(instance=obj.question)
         return content.data
+
+    def get_add_time(self,obj):
+        time_array = time.localtime(obj.add_time)
+        return time.strftime('%Y-%m-%d %H:%M',time_array)
 
     class Meta:
         model = UserDynamic
@@ -238,5 +241,9 @@ class UserDynamicAnswerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Answer
         fields = ['id','question_title','user_nick_name','approval_number','comment_number','content']
+
+
+
+
 
 
