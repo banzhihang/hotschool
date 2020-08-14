@@ -43,7 +43,7 @@ class QuestionInfoSerializer(serializers.ModelSerializer):
 class PostQuestionSerializer(serializers.ModelSerializer):
     """
     发布问题序列化器
-    必要参数:title(问题标题),user(用户id),school(学校id)
+    必要参数:title(问题标题),school(学校id)
     选要参数:content(问题内容)
     """
     title = serializers.CharField(required=True,min_length=4,max_length=50,allow_blank=False,error_messages={
@@ -53,12 +53,16 @@ class PostQuestionSerializer(serializers.ModelSerializer):
     })
     content = serializers.CharField(required=False)
 
+    def validate(self, attrs):
+        attrs['user'] = self.context['request'].user
+        return attrs
+
     def create(self, validated_data):
         return Question.objects.create(**validated_data)
 
     class Meta:
         model = Question
-        fields = ['title','content','school','user']
+        fields = ['title','content','school']
 
 
 class AnswerInfoSerializer(serializers.ModelSerializer):
@@ -194,13 +198,17 @@ class PostAnswerSerializer(serializers.ModelSerializer):
         'required':'此选项不允许为空'
     })
 
+    def validate(self, attrs):
+        attrs['user'] = self.context['request'].user
+        return attrs
+
     def create(self, validated_data):
         question = validated_data.get('question')
         return Answer.objects.create(**validated_data),question
 
     class Meta:
         model = Answer
-        fields = ['content','question','user','is_anonymity']
+        fields = ['content','question','is_anonymity']
 
 
 class CommentInfoSerializer(serializers.ModelSerializer):

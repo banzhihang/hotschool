@@ -55,9 +55,9 @@ class LooseAuthtication(BasicAuthentication):
             return user, None
 
 
-def get_ordering(answer_id):
+def get_ordering(id_list):
     # 生成排序条件
-    condition_list = ['WHEN id = % s THEN % s' % (pk, index) for index, pk in enumerate(answer_id)]
+    condition_list = ['WHEN id = % s THEN % s' % (pk, index) for index, pk in enumerate(id_list)]
     condition = ' '.join(condition_list)
     ordering = 'CASE %s END' % condition
 

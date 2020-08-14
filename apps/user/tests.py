@@ -131,42 +131,45 @@ POOL = redis.ConnectionPool(host='127.0.0.1', port=6379,db=1,decode_responses=Tr
 # #
 # # check_hot_question_expire_time()
 
-from datetime import datetime,timedelta
-def calculate_question_and_syn(question_id):
-    """
-    计算问题的热度值,并将相关数据同步至数据库
-    参数:question_id(问题id)
-    执行时间:第二天半夜2点
-    """
-    yesterday = (datetime.now() - timedelta(days=1)).strftime('%Y%m%d')  # 昨天的时间字符串
-    coon = redis.Redis(connection_pool=POOL)
-    # 获取问题数据
-    question_data = coon.hmget('qd:'+str(question_id)+':'+yesterday,'scan','answer','approval','attention','comment',
-                               'collect','school')
-    school_id = question_data[6]
-    # 获得上榜问题记录
-    hot_record_list = coon.zrange('hot:record:',start=0,end=-1)
-
-    # 只有不在该学校的热榜上的问题才能上榜
-    if str(question_id) not in hot_record_list:
-        today = datetime.now().strftime('%Y%m%d')
-        # 上榜问题的下一次能上榜限制时间
-        expire_time = (datetime.now() + timedelta(days=2)).timestamp()
-        scan_num,answer_num,approval_num,attention_num,comment_num,collect_num = question_data[0],question_data[1],question_data[2],question_data[3],question_data[4],question_data[5]
-        score = calculate_question_hot_score(scan_num,answer_num,approval_num,attention_num,collect_num,collect_num)
-        # 将该问题添加到问题对应学校的热榜zset
-        coon.zadd('hot:'+str(school_id)+':'+today,{question_id:score})
-        # 将该问题添加到上榜记录
-        coon.zadd('hot:record:',{question_id:expire_time})
-    # # 无论问题是否上榜,都同步数据到数据库
-    # try:
-    #     Question.objects.filter(pk=question_id).update(
-    #         attention_number=F('attention_number')+attention_num,
-    #         scan_number=F('scan_number')+scan_num,
-    #     )
-    # except:
-    #     pass
-    # # 删除该问题留存在redis中的数据
-    coon.delete('qd:'+str(question_id)+':'+yesterday)
-
-calculate_question_and_syn(1)
+# from datetime import datetime,timedelta
+# def calculate_question_and_syn(question_id):
+#     """
+#     计算问题的热度值,并将相关数据同步至数据库
+#     参数:question_id(问题id)
+#     执行时间:第二天半夜2点
+#     """
+#     yesterday = (datetime.now() - timedelta(days=1)).strftime('%Y%m%d')  # 昨天的时间字符串
+#     coon = redis.Redis(connection_pool=POOL)
+#     # 获取问题数据
+#     question_data = coon.hmget('qd:'+str(question_id)+':'+yesterday,'scan','answer','approval','attention','comment',
+#                                'collect','school')
+#     school_id = question_data[6]
+#     # 获得上榜问题记录
+#     hot_record_list = coon.zrange('hot:record:',start=0,end=-1)
+#
+#     # 只有不在该学校的热榜上的问题才能上榜
+#     if str(question_id) not in hot_record_list:
+#         today = datetime.now().strftime('%Y%m%d')
+#         # 上榜问题的下一次能上榜限制时间
+#         expire_time = (datetime.now() + timedelta(days=2)).timestamp()
+#         scan_num,answer_num,approval_num,attention_num,comment_num,collect_num = question_data[0],question_data[1],question_data[2],question_data[3],question_data[4],question_data[5]
+#         score = calculate_question_hot_score(scan_num,answer_num,approval_num,attention_num,collect_num,collect_num)
+#         # 将该问题添加到问题对应学校的热榜zset
+#         coon.zadd('hot:'+str(school_id)+':'+today,{question_id:score})
+#         # 将该问题添加到上榜记录
+#         coon.zadd('hot:record:',{question_id:expire_time})
+#     # # 无论问题是否上榜,都同步数据到数据库
+#     # try:
+#     #     Question.objects.filter(pk=question_id).update(
+#     #         attention_number=F('attention_number')+attention_num,
+#     #         scan_number=F('scan_number')+scan_num,
+#     #     )
+#     # except:
+#     #     pass
+#     # # 删除该问题留存在redis中的数据
+#     coon.delete('qd:'+str(question_id)+':'+yesterday)
+#
+# calculate_question_and_syn(1)
+coon = redis.Redis(connection_pool=POOL)
+answer_id = coon.zrange('answer:score:2',start=100,end=100)
+print(answer_id)

@@ -271,10 +271,12 @@ class PostFoodSerializer(serializers.ModelSerializer):
 
     def validate(self,attr):
         #验证口味
-        flavour_str = attr.get('flavour')
+        flavour_str = attr.pop('flavour',None)
         if flavour_str:
             # 将flavour_str拆成列表,查询是否存在该口味
             flavour_list = flavour_str.split(',')
+            if len(flavour_list) <2:
+                raise serializers.ValidationError('最少两个标签')
             try:
                 flavour = Flavour.objects.filter(id__in=flavour_list)
             except:
@@ -284,6 +286,8 @@ class PostFoodSerializer(serializers.ModelSerializer):
                     raise serializers.ValidationError('标签异常')
                 else:
                     attr['flavour'] = flavour_list
+        else:
+            raise serializers.ValidationError('标签不允许为空')
         attr['user'] = self.context['request'].user
         return attr
 

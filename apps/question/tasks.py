@@ -20,7 +20,8 @@ def push_to_user(from_user, to_user, type, instance=None):
     通知用户的异步任务
     from_user:引发推送的用户(一个对象)
     to_user:推送的目标用户
-    instance:引发推送的实列(例如评论,回复等)()
+    instance:引发推送的实列(例如评论,回复等)
+    :type:通知类型
     执行时间:发生动态之后
     """
     to_user,type = int(to_user),int(type)
@@ -32,7 +33,7 @@ def push_to_user(from_user, to_user, type, instance=None):
     user_head_portrait = domain_name + from_user.head_portrait.url
     if type == 3:  # 回复
         # 该回复所属的回答,和评论
-        answer_set = Answer.objects.filter(comment__revert=instance).values('id', 'question__title')
+        answer_set = Answer.objects.filter(comment__revert=instance).values('id', 'question__title','question_id')
         comment_set = Comment.objects.filter(revert=instance).values('id')
         # 封装进字典
         push_data = {'user': from_user.pk, 'user_nick_name': user_nick_name, 'user_head_portrait': user_head_portrait,
@@ -48,10 +49,10 @@ def push_to_user(from_user, to_user, type, instance=None):
         notification_user(to_user, data)
 
     elif type == 1:  # 评论
-        question_set = Question.objects.filter(answer__comment=instance).values('id', 'title')
+        answer_set = Answer.objects.filter(comment=instance).values('id','question_id','question__title')
         push_data = {'user': from_user.pk, 'user_nick_name': user_nick_name, 'user_head_portrait': user_head_portrait,
-                     'question_title': question_set[0]['title'], 'question': question_set[0]['id'],
-                     'content': instance.content}
+                     'question_title': answer_set[0]['question__title'], 'question': answer_set[0]['question_id'],
+                     'answer':answer_set[0]['id'],'content': instance.content}
         data = {'from_user': -1, 'message': push_data, 'time': now_time, 'type': 1}
         notification_user(to_user, data)
 
@@ -71,7 +72,7 @@ def push_to_user(from_user, to_user, type, instance=None):
         comment_set = FoodComment.objects.filter(foodrevert=instance).values('id')
         push_data = {'user': from_user.pk, 'user_nick_name': user_nick_name, 'user_head_portrait': user_head_portrait,
                      'discuss': disscus_set[0]['id'], 'discuss_title': disscus_set[0]['title'],
-                     'discuss_food_name': disscus_set[0]['food__name'], 'comment': comment_set[0]['id']
+                     'discuss_food_name': disscus_set[0]['food__name'], 'comment': comment_set[0]['id'],'content':instance.content
                      }
         data = {'from_user': -1, 'message': push_data, 'time': now_time, 'type': 5}
         notification_user(to_user, data)

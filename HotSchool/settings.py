@@ -85,6 +85,8 @@ INSTALLED_APPS = [
     'communicate',
     'food',
     'upload',
+    'recommend',
+    'draft',
 ]
 
 AUTH_USER_MODEL = 'user.User'

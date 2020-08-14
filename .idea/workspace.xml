@@ -2,80 +2,28 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="a9a08896-2fca-4be8-8719-007b9aad069b" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/apps/food/migrations/0001_initial.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/apps/food/migrations/0002_auto_20200726_1511.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/apps/food/migrations/0003_auto_20200726_1635.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/apps/food/migrations/0004_auto_20200726_1955.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/apps/food/migrations/0005_auto_20200726_2019.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/apps/food/migrations/0006_eatrecord.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/apps/food/migrations/0007_delete_eatrecord.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/apps/food/migrations/0008_auto_20200726_2221.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/apps/food/migrations/0009_foodcomment_revert_number.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/apps/food/migrations/0010_auto_20200727_1903.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/apps/food/migrations/0011_foodmark.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/apps/food/migrations/0012_foodmark_score.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/apps/food/migrations/0013_food_short_comment_number.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/apps/food/migrations/0014_food_discuss_number.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/apps/food/migrations/0015_auto_20200728_1016.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/apps/food/migrations/0016_auto_20200728_1017.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/apps/food/migrations/0017_auto_20200728_1018.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/apps/food/migrations/0018_auto_20200728_1019.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/apps/food/migrations/0019_auto_20200728_1021.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/apps/food/migrations/0020_auto_20200731_2133.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/apps/food/migrations/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/apps/question/migrations/0003_auto_20200719_1523.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/apps/question/migrations/0004_auto_20200722_0939.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/apps/question/migrations/0005_auto_20200722_1020.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/apps/question/migrations/0006_auto_20200722_1225.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/apps/question/migrations/0007_auto_20200726_1502.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/apps/question/migrations/0008_auto_20200731_1609.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/apps/question/migrations/0009_auto_20200731_1659.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/apps/question/migrations/0010_auto_20200731_1733.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/apps/question/migrations/0011_auto_20200731_2133.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/apps/question/migrations/0012_auto_20200809_2117.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/apps/search/migrations/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/apps/upload/migrations/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/apps/user/migrations/0008_auto_20200719_1523.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/apps/user/migrations/0009_auto_20200720_1021.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/apps/user/migrations/0010_auto_20200720_1122.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/apps/user/migrations/0011_auto_20200722_0939.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/apps/user/migrations/0012_auto_20200725_1317.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/apps/user/migrations/0013_auto_20200726_2026.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/apps/user/migrations/0014_auto_20200731_2133.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/apps/user/migrations/0015_school_is_campus.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/apps/draft/migrations/0001_initial.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/apps/draft/migrations/0002_auto_20200814_1003.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/apps/draft/migrations/0003_auto_20200814_1025.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/apps/draft/migrations/0004_auto_20200814_1135.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/apps/draft/migrations/0005_auto_20200814_1240.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/apps/draft/migrations/0006_auto_20200814_1243.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/apps/draft/migrations/0007_auto_20200814_1244.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/apps/draft/migrations/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/apps/question/migrations/0013_auto_20200814_1003.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/apps/recommend/migrations/__init__.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/HotSchool/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/HotSchool/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/HotSchool/celery.py" beforeDir="false" afterPath="$PROJECT_DIR$/HotSchool/celery.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/HotSchool/routing.py" beforeDir="false" afterPath="$PROJECT_DIR$/HotSchool/routing.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/HotSchool/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/HotSchool/settings.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/HotSchool/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/HotSchool/urls.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/communicate/consumers.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/communicate/consumers.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/communicate/extra.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/communicate/extra.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/communicate/templates/chat/room2.html" beforeDir="false" afterPath="$PROJECT_DIR$/apps/communicate/templates/chat/room2.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/communicate/tests.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/communicate/tests.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/communicate/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/communicate/views.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/operation/logics.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/operation/tasks.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/operation/tasks.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/operation/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/operation/urls.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/operation/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/operation/views.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/question/algorithms.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/question/algorithms.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/question/extra.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/question/extra.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/question/logics.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/food/serializers.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/food/serializers.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/apps/question/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/question/models.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/apps/question/serializers.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/question/serializers.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/apps/question/tasks.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/question/tasks.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/apps/question/tests.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/question/tests.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/question/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/question/urls.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/apps/question/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/question/views.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/user/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/user/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/user/extra.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/user/extra.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/user/logics.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/user/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/user/models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/user/serializers.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/user/serializers.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/apps/user/tests.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/user/tests.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/user/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/user/urls.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/apps/user/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/user/views.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/other.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/puclic.py" beforeDir="false" afterPath="$PROJECT_DIR$/puclic.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -151,15 +99,15 @@
     <property name="node.js.selected.package.tslint" value="(autodetect)" />
     <property name="restartRequiresConfirmation" value="false" />
     <property name="run.code.analysis.last.selected.profile" value="aDefault" />
-    <property name="settings.editor.selected.configurable" value="reference.settingsdialog.IDE.editor.colors" />
+    <property name="settings.editor.selected.configurable" value="preferences.pluginManager" />
   </component>
   <component name="RecentsManager">
-    <key name="CopyFile.RECENT_KEYS">
-      <recent name="C:\Users\m\PycharmProjects\HotSchool\media\headimage" />
-    </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="C:\Users\m\PycharmProjects\HotSchool\apps" />
       <recent name="C:\Users\m\PycharmProjects\HotSchool" />
+    </key>
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\m\PycharmProjects\HotSchool\media\headimage" />
     </key>
   </component>
   <component name="RunManager" selected="Django server.HotSchool">
@@ -389,6 +337,11 @@
       <workItem from="1596764114175" duration="53298000" />
       <workItem from="1596937165164" duration="18948000" />
       <workItem from="1596990016435" duration="14000" />
+      <workItem from="1596990679948" duration="679000" />
+      <workItem from="1597026128951" duration="3377000" />
+      <workItem from="1597204059821" duration="38499000" />
+      <workItem from="1597365191021" duration="20148000" />
+      <workItem from="1597392088284" duration="86000" />
     </task>
     <servers />
   </component>
@@ -416,50 +369,54 @@
       <screen x="0" y="0" width="1376" height="744" />
     </state>
     <state x="451" y="252" key="ANALYSIS_DLG_com.intellij.analysis.BaseAnalysisAction$1/0.0.1376.744@0.0.1376.744" timestamp="1590638837224" />
-    <state width="1333" height="58" key="GridCell.Tab.0.bottom" timestamp="1596989933908">
+    <state x="471" y="117" key="FileChooserDialogImpl" timestamp="1597365142562">
       <screen x="0" y="0" width="1376" height="744" />
     </state>
-    <state width="1333" height="58" key="GridCell.Tab.0.bottom/0.0.1376.744@0.0.1376.744" timestamp="1596989933908" />
-    <state width="1333" height="58" key="GridCell.Tab.0.center" timestamp="1596989933908">
+    <state x="471" y="117" key="FileChooserDialogImpl/0.0.1376.744@0.0.1376.744" timestamp="1597365142562" />
+    <state width="1333" height="100" key="GridCell.Tab.0.bottom" timestamp="1597391975694">
       <screen x="0" y="0" width="1376" height="744" />
     </state>
-    <state width="1333" height="58" key="GridCell.Tab.0.center/0.0.1376.744@0.0.1376.744" timestamp="1596989933908" />
-    <state width="1333" height="58" key="GridCell.Tab.0.left" timestamp="1596989933908">
+    <state width="1333" height="100" key="GridCell.Tab.0.bottom/0.0.1376.744@0.0.1376.744" timestamp="1597391975694" />
+    <state width="1333" height="100" key="GridCell.Tab.0.center" timestamp="1597391975693">
       <screen x="0" y="0" width="1376" height="744" />
     </state>
-    <state width="1333" height="58" key="GridCell.Tab.0.left/0.0.1376.744@0.0.1376.744" timestamp="1596989933908" />
-    <state width="1333" height="58" key="GridCell.Tab.0.right" timestamp="1596989933908">
+    <state width="1333" height="100" key="GridCell.Tab.0.center/0.0.1376.744@0.0.1376.744" timestamp="1597391975693" />
+    <state width="1333" height="100" key="GridCell.Tab.0.left" timestamp="1597391975693">
       <screen x="0" y="0" width="1376" height="744" />
     </state>
-    <state width="1333" height="58" key="GridCell.Tab.0.right/0.0.1376.744@0.0.1376.744" timestamp="1596989933908" />
-    <state width="1333" height="58" key="GridCell.Tab.1.bottom" timestamp="1596989933909">
+    <state width="1333" height="100" key="GridCell.Tab.0.left/0.0.1376.744@0.0.1376.744" timestamp="1597391975693" />
+    <state width="1333" height="100" key="GridCell.Tab.0.right" timestamp="1597391975693">
       <screen x="0" y="0" width="1376" height="744" />
     </state>
-    <state width="1333" height="58" key="GridCell.Tab.1.bottom/0.0.1376.744@0.0.1376.744" timestamp="1596989933909" />
-    <state width="1333" height="58" key="GridCell.Tab.1.center" timestamp="1596989933909">
+    <state width="1333" height="100" key="GridCell.Tab.0.right/0.0.1376.744@0.0.1376.744" timestamp="1597391975693" />
+    <state width="1333" height="100" key="GridCell.Tab.1.bottom" timestamp="1597391975694">
       <screen x="0" y="0" width="1376" height="744" />
     </state>
-    <state width="1333" height="58" key="GridCell.Tab.1.center/0.0.1376.744@0.0.1376.744" timestamp="1596989933909" />
-    <state width="1333" height="58" key="GridCell.Tab.1.left" timestamp="1596989933908">
+    <state width="1333" height="100" key="GridCell.Tab.1.bottom/0.0.1376.744@0.0.1376.744" timestamp="1597391975694" />
+    <state width="1333" height="100" key="GridCell.Tab.1.center" timestamp="1597391975694">
       <screen x="0" y="0" width="1376" height="744" />
     </state>
-    <state width="1333" height="58" key="GridCell.Tab.1.left/0.0.1376.744@0.0.1376.744" timestamp="1596989933908" />
-    <state width="1333" height="58" key="GridCell.Tab.1.right" timestamp="1596989933909">
+    <state width="1333" height="100" key="GridCell.Tab.1.center/0.0.1376.744@0.0.1376.744" timestamp="1597391975694" />
+    <state width="1333" height="100" key="GridCell.Tab.1.left" timestamp="1597391975694">
       <screen x="0" y="0" width="1376" height="744" />
     </state>
-    <state width="1333" height="58" key="GridCell.Tab.1.right/0.0.1376.744@0.0.1376.744" timestamp="1596989933909" />
+    <state width="1333" height="100" key="GridCell.Tab.1.left/0.0.1376.744@0.0.1376.744" timestamp="1597391975694" />
+    <state width="1333" height="100" key="GridCell.Tab.1.right" timestamp="1597391975694">
+      <screen x="0" y="0" width="1376" height="744" />
+    </state>
+    <state width="1333" height="100" key="GridCell.Tab.1.right/0.0.1376.744@0.0.1376.744" timestamp="1597391975694" />
     <state width="199" height="477" key="HiddenNamespacesPopup" timestamp="1596889085004">
       <screen x="0" y="0" width="1376" height="744" />
     </state>
     <state width="199" height="477" key="HiddenNamespacesPopup/0.0.1376.744@0.0.1376.744" timestamp="1596889085004" />
-    <state x="192" y="18" key="SettingsEditor" timestamp="1591528610139">
+    <state x="192" y="18" key="SettingsEditor" timestamp="1597392148371">
       <screen x="0" y="0" width="1376" height="744" />
     </state>
-    <state x="192" y="18" key="SettingsEditor/0.0.1376.744@0.0.1376.744" timestamp="1591528610139" />
-    <state width="698" height="382" key="XDebugger.FullValuePopup" timestamp="1596625738476">
+    <state x="192" y="18" key="SettingsEditor/0.0.1376.744@0.0.1376.744" timestamp="1597392148371" />
+    <state width="698" height="382" key="XDebugger.FullValuePopup" timestamp="1597285503016">
       <screen x="0" y="0" width="1376" height="744" />
     </state>
-    <state width="698" height="382" key="XDebugger.FullValuePopup/0.0.1376.744@0.0.1376.744" timestamp="1596625738476" />
+    <state width="698" height="382" key="XDebugger.FullValuePopup/0.0.1376.744@0.0.1376.744" timestamp="1597285503016" />
     <state x="93" y="93" width="1190" height="558" key="com.intellij.history.integration.ui.views.DirectoryHistoryDialog" timestamp="1594450328179">
       <screen x="0" y="0" width="1376" height="744" />
     </state>
@@ -476,11 +433,6 @@
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/apps/user/tests.py</url>
-          <line>140</line>
-          <option name="timeStamp" value="38" />
-        </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$USER_HOME$/Envs/hotschool/Lib/site-packages/drf_haystack/filters.py</url>
           <line>59</line>
@@ -500,8 +452,8 @@
     <SUITE FILE_PATH="coverage/HotSchool$tests__1_.coverage" NAME="tests (1) Coverage Results" MODIFIED="1595316345847" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/apps/communicate" />
     <SUITE FILE_PATH="coverage/HotSchool$99999.coverage" NAME="99999 Coverage Results" MODIFIED="1591679116142" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/apps/user" />
     <SUITE FILE_PATH="coverage/HotSchool$s1.coverage" NAME="s1 Coverage Results" MODIFIED="1596166422816" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/HotSchool/test" />
-    <SUITE FILE_PATH="coverage/HotSchool$tests__2_.coverage" NAME="tests (2) Coverage Results" MODIFIED="1596893303817" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/apps/question" />
-    <SUITE FILE_PATH="coverage/HotSchool$tests.coverage" NAME="tests Coverage Results" MODIFIED="1596347195020" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/apps/user" />
+    <SUITE FILE_PATH="coverage/HotSchool$tests__2_.coverage" NAME="tests (2) Coverage Results" MODIFIED="1597295637302" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/apps/question" />
+    <SUITE FILE_PATH="coverage/HotSchool$tests.coverage" NAME="tests Coverage Results" MODIFIED="1597236268988" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/apps/user" />
     <SUITE FILE_PATH="coverage/HotSchool$test222.coverage" NAME="test222 Coverage Results" MODIFIED="1591696323324" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/apps/user" />
     <SUITE FILE_PATH="coverage/HotSchool$consumers.coverage" NAME="consumers Coverage Results" MODIFIED="1592706924139" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/apps/communicate" />
     <SUITE FILE_PATH="coverage/HotSchool$algorithms__1_.coverage" NAME="algorithms (1) Coverage Results" MODIFIED="1596264099337" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/apps/food" />

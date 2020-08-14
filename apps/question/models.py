@@ -14,7 +14,7 @@ class Question(models.Model):
     user = models.ForeignKey('user.User', on_delete=models.CASCADE, verbose_name='所属的用户')
     interest_circle = models.ManyToManyField('user.Interest',verbose_name='问题的兴趣圈子',)
     add_time = models.DateField(verbose_name='问题发布时间', auto_now_add=True)
-    modify_time = models.DateTimeField(verbose_name='修改时间', default=timezone.now)
+    modify_time = models.DateTimeField(verbose_name='修改时间',auto_now = True)
 
     class Meta:
         verbose_name = '问题'
@@ -67,7 +67,7 @@ class Answer(models.Model):
     like_number = models.IntegerField(verbose_name='喜欢数', default=0)
     collect_number = models.IntegerField(verbose_name='收藏数', default=0)
     add_time = models.DateTimeField(auto_now_add=True, verbose_name='添加时间',db_index=True)
-    modify_time = models.DateTimeField(default=timezone.now, verbose_name='修改时间')
+    modify_time = models.DateTimeField(verbose_name='修改时间',auto_now = True)
 
     class Meta:
         verbose_name = '回答'

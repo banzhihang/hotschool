@@ -100,7 +100,11 @@ class QuestionView(APIView):
             return Response({'error':'未登录'})
         ser = PostQuestionSerializer(data=request.data,context={'request': request})
         if ser.is_valid():
-            ser.save()
+            question = ser.save()
+            coon = redis.Redis(connection_pool=POOL)
+            # 将该问题id添加到推荐池
+            coon.sadd('question:recommend',question.pk)
+            coon.sadd('recommend:'+str(question.school_id),question.pk)
             return Response({'status':'ok','error':''})
         else:
             return Response({'status':'fail','error':ser.errors})
@@ -177,8 +181,6 @@ class AnswerView(APIView):
 
     def post(self,request):
         """发布回答"""
-        if isinstance(request.user, AnonymousUser):
-            return Response({'error':'未登录'})
         ser = PostAnswerSerializer(data=request.data,context={'request': request})
         if ser.is_valid():
             answer,question = ser.save()
@@ -189,6 +191,8 @@ class AnswerView(APIView):
             coon.zadd('answer:time:' + str(question.pk), {answer.pk:now_timestamp})
             question.answer_number = F('answer_number') + 1
             question.save()
+            # 增加该问题的回答热度数据
+            add_question_operation_data('answer', question.pk)
             return Response({'status':'ok','error':''})
         else:
             return Response({'status':'fail','error':ser.errors})

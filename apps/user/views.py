@@ -2,7 +2,6 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_jwt.settings import api_settings
 
-from HotSchool.settings import POOL
 from puclic import Authtication, get_ordering
 from question.serializers import CommentInfoSerializer
 from .extra import OpenIdAndImage, modify_headimage_name,uuid_string,create_user_dynamic

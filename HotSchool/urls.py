@@ -19,6 +19,7 @@ from django.views.static import serve
 
 from HotSchool import settings
 from question.views import QuestionView
+from recommend.views import RecommendView
 from upload.views import UploadTokenView
 
 from user.views import LoginView
@@ -42,9 +43,13 @@ urlpatterns = [
     # 美食相关
     path('food/', include('food.urls'), name='food'),
     # 聊天相关
-    path('chat/', include('communicate.urls')),
+    path('chat/', include('communicate.urls'),name='chat'),
     # 搜索
-    path('search/', include('search.urls')),
+    path('search/', include('search.urls'),name='search'),
     # 上传图片
-    path('upload',UploadTokenView.as_view())
+    path('upload',UploadTokenView.as_view()),
+    # 推荐
+    path('recommend',RecommendView.as_view()),
+    # 草稿箱
+    path('draft/',include('draft.urls'),name='draft')
 ]
