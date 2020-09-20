@@ -1,4 +1,5 @@
 import json
+import re
 from datetime import datetime,timedelta
 import time
 # a = time.strftime('%Y%m%d')
@@ -114,6 +115,8 @@ import time
 # print(expire_time,expire_time1)
 import redis
 #
+from bs4 import BeautifulSoup
+
 POOL = redis.ConnectionPool(host='127.0.0.1', port=6379,db=1,decode_responses=True)
 #
 #
@@ -199,7 +202,22 @@ POOL = redis.ConnectionPool(host='127.0.0.1', port=6379,db=1,decode_responses=Tr
 #             ('answer', answer_data),
 #         ]
 
-coon = redis.Redis(connection_pool=POOL)
-a = coon.zrange('a',start=0,end=-1)
-print(a)
+# coon = redis.Redis(connection_pool=POOL)
+# a = coon.zrange('a',start=0,end=-1)
+# print(a)
+
+import html
+# s = '''
+# <p>让我日群无若无群若热无群若无温热群热情无若而我却若犬瘟热玩儿请问</p><p>wrwriworiw</p><p>你好啊啊</p><p><img src="http://img1.3lian.com/2015/w7/85/d/101.jpg" data-custom='id=imgage'></p><p><br></p>
+# '''
+# def test(html):
+#     pattern = re.compile('img src="(.*?)"')
+#     # 获得第一张图片
+#     img_url = pattern.search(html)
+#     # 获得回答摘要
+#     clean_text = BeautifulSoup(html, "lxml").get_text(strip=True)
+#
+#     print(img_url[1],clean_text)
+#
+# test(s)
 

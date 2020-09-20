@@ -5,6 +5,7 @@ import redis
 from rest_framework import serializers
 
 from HotSchool.settings import domain_name, POOL
+from food.models import Food
 from question.models import *
 from HotSchool import settings
 from user.models import *
@@ -13,22 +14,12 @@ from user.models import *
 class UserInfoSerializer(serializers.ModelSerializer):
     """用户数据序列化器"""
     nick_name = serializers.CharField()
-    phone = serializers.CharField(default='')
     desc = serializers.CharField(default='')
     school = serializers.CharField(source='school.name',default='')
-    interests = serializers.SerializerMethodField(read_only=True,default='')
-    add_time = serializers.DateField(format='%Y-%m-%d',read_only=True)
-
-    def get_interests(self, user):
-        # 兴趣为多对多，要用以下方法获得兴趣的名称
-        interests = user.interest.all()
-        interests = [interest.name for interest in interests]
-        return interests
 
     class Meta:
         model = User
-        fields = ['id','nick_name', 'head_portrait', 'phone', 'desc', 'school',
-                   'add_time', 'interests']
+        fields = ['nick_name', 'head_portrait','desc', 'school']
 
 
 class UpdateUserInfoSerializer(serializers.ModelSerializer):
@@ -40,43 +31,30 @@ class UpdateUserInfoSerializer(serializers.ModelSerializer):
         'min_length': '昵称最低2个字符',
         'max_length': '昵称最大10字符'
     })
-    phone = serializers.CharField(min_length=11, max_length=11, required=False, error_messages={
-        'min_length': '手机号最低11个字符',
-        'max_length': '手机号最大11字符'
-    })
     desc = serializers.CharField(min_length=5, max_length=30, required=False, error_messages={
         'min_length': '个人描述最低5个字符',
         'max_length': '个人描述最大30字符'})
-    school = serializers.IntegerField(required=False)
-    interest = serializers.IntegerField(required=False)
+    school = serializers.CharField(required=False)
 
 
     def validate(self, attrs):
         school = attrs.get('school')
-        interest = attrs.get('interest')
-
+        # 验证学校是否存在
         if school:
-            attrs['school_id'] = int(school)
-            attrs.pop('school')
+            try:
+                school = School.objects.get(name=school)
+            except school.DoesNotExist:
+                raise serializers.ValidationError('学校不存在')
+            else:
+                attrs['school_id'] = int(school.id)
+                attrs.pop('school')
 
-        if interest:
-            interest = interest.split(',')
-            interests_id = Interest.objects.filter(name__in=interest).values_list('id')
-            interests_id_list = [i[0] for i in interests_id]
-            attrs['interest'] = interests_id_list
         return attrs
 
     def update(self, instance, validated_data):
         new_head_portrait = validated_data.get('head_portrait',None)
-        interest = validated_data.get('interest',None)
-        if new_head_portrait is None:
-            if interest is None:
-                return User.objects.filter(id=instance.id).update(**validated_data)
-            else:
-                instance.interest.set(interest)
-                instance.save()
-                validated_data.pop('interest')
-                return User.objects.filter(id=instance.id).update(**validated_data)
+        if not new_head_portrait:
+            return User.objects.filter(id=instance.id).update(**validated_data)
         else:
             image_url = instance.head_portrait.name
             # 若旧图片不是默认图片，则先移除旧图片再更新图片
@@ -84,23 +62,16 @@ class UpdateUserInfoSerializer(serializers.ModelSerializer):
                 # 更新图片之前删除旧照片
                 path = settings.MEDIA_ROOT + '\\' + image_url
                 os.remove(path)
+
             instance.head_portrait = new_head_portrait
-            if interest is None:
-                instance.save()
-                validated_data.pop('head_portrait')
-                return User.objects.filter(id=instance.id).update(**validated_data)
-            else:
-                # update方法无法正确更新图片的路径，必须使用save方法
-                instance.interest.set(interest)
-                instance.save()
-                validated_data.pop('head_portrait')
-                validated_data.pop('interest')
-                return User.objects.filter(id=instance.id).update(**validated_data)
+            # update方法无法正确更新图片的路径，必须使用save方法
+            instance.save()
+            validated_data.pop('head_portrait')
+            return User.objects.filter(id=instance.id).update(**validated_data)
 
     class Meta:
         model = User
-        fields = ['nick_name','head_portrait','phone','desc',
-                    'school','interest']
+        fields = ['nick_name','head_portrait','desc','school']
 
 
 class UserRecentBrowseAnswerSerializer(serializers.ModelSerializer):
@@ -111,7 +82,7 @@ class UserRecentBrowseAnswerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Answer
         fields = ['id', 'user_nick_name', 'approval_number',
-                  'comment_number','content','question_title']
+                  'comment_number','abstract','question_title']
 
 
 class UserAttentionSerializer(serializers.ModelSerializer):
@@ -150,7 +121,7 @@ class UserAnswerCollectSerializer(serializers.ModelSerializer):
     class Meta:
         model = Answer
         fields = ['id','question_title','user_head_portrait',
-                  'user_nick_name','approval_number','comment_number']
+                  'user_nick_name','abstract','approval_number','comment_number']
 
 
 class UserRevertInfoSerializer(serializers.ModelSerializer):
@@ -171,6 +142,52 @@ class UserRevertInfoSerializer(serializers.ModelSerializer):
                   'question_title','content','approval_number','add_time']
 
 
+class UserCommentInfoSerializer(serializers.ModelSerializer):
+    """用户评论序列化器"""
+    question = serializers.IntegerField(source='answer.question.pk')
+    question_title = serializers.CharField(source='answer.question.title')
+    answer = serializers.IntegerField(source='answer.pk')
+
+    class Meta:
+        model = Comment
+        fields = ['id','question','question_title','answer','content','approval_number','revert_number']
+
+
+class UserFoodInfoSerializer(serializers.ModelSerializer):
+    """用户的美食信息序列化器"""
+    score = serializers.SerializerMethodField()
+
+    def get_score(self,obj):
+        """将分数值舍入到小数点一位来显示"""
+        if obj.vote_number <20:
+            return None
+        else:
+            return round(obj.score,1)
+
+    class Meta:
+        model = Food
+        fields = ['id','name','image_first','score']
+
+
+class UserFoodCollectSerializer(serializers.ModelSerializer):
+    """用户美食收藏序列化器"""
+    id = serializers.IntegerField(source='food.id')
+    name = serializers.CharField(source='food.name')
+    image_first = serializers.CharField(source='food.image_first')
+    score = serializers.SerializerMethodField()
+
+    def get_score(self,obj):
+        """将分数值舍入到小数点一位来显示"""
+        if obj.food.vote_number <20:
+            return None
+        else:
+            return round(obj.food.score,1)
+
+    class Meta:
+        model = UserCollectFood
+        fields = ['id','name','image_first','score']
+
+
 class UserAnswerInfoSerializer(serializers.ModelSerializer):
     """用户回答信息序列化"""
     user_nick_name = serializers.CharField(source='user.nick_name')
@@ -181,7 +198,7 @@ class UserAnswerInfoSerializer(serializers.ModelSerializer):
     class Meta:
         model = Answer
         fields = ['id','user_nick_name','approval_number',
-                  'comment_number','content','user_head_portrait','question_title']
+                  'comment_number','abstract','user_head_portrait','question_title']
 
 
 class UserInfoShowSerializer(serializers.ModelSerializer):
@@ -209,6 +226,7 @@ class UserInfoShowSerializer(serializers.ModelSerializer):
         model = UserData
         fields = ['user','nick_name','desc','head_portrait','collect_user_number','user_be_collect_number',
                   'approval_number','like_number','collect_number','read_number']
+
 
 class UserDynamicSerializer(serializers.ModelSerializer):
     """用户动态序列化器"""
@@ -240,7 +258,21 @@ class UserDynamicAnswerSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Answer
-        fields = ['id','question_title','user_nick_name','approval_number','comment_number','content']
+        fields = ['id','question_title','user_nick_name','approval_number','comment_number','abstract']
+
+
+class CollectCommentInfoSerializer(serializers.ModelSerializer):
+    """我的发布中评论详情序列化器"""
+    nick_name = serializers.CharField(source='user.nick_name')
+    head_portrait = serializers.ImageField(source='user.head_portrait')
+    question = serializers.IntegerField(source='answer.question.pk')
+    question_title = serializers.CharField(source='answer.question.title')
+    answer = serializers.IntegerField(source='answer.pk')
+    add_time = serializers.DateTimeField(format='%Y-%m-%d %H:%M')
+
+    class Meta:
+        model = Comment
+        fields = ['id','question','nick_name','head_portrait','question_title','answer','add_time','content','revert_number']
 
 
 

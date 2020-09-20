@@ -1,6 +1,8 @@
+import redis
+from django.contrib.auth.models import AnonymousUser
 from drf_haystack.serializers import HaystackSerializer
 
-from HotSchool.settings import domain_name
+from HotSchool.settings import domain_name, POOL
 from food.models import Food, Flavour
 from food.search_indexes import FoodIndex, FlavourIndex
 from question.models import Question
@@ -35,7 +37,10 @@ class FoodSerializer(serializers.ModelSerializer):
 
     def get_score(self,obj):
         """将分数值舍入到小数点一位来显示"""
-        return round(obj.score,1)
+        if obj.vote_number <20:
+            return None
+        else:
+            return round(obj.score,1)
 
     class Meta:
         model = Food
@@ -53,13 +58,27 @@ class FoodSearchSerializer(HaystackSerializer):
 class UserSerializer(serializers.ModelSerializer):
     """用户信息序列化器"""
     head_portrait = serializers.SerializerMethodField()
+    is_attention = serializers.SerializerMethodField()
+
+    # 判断用户是否关注目标用户
+    def get_is_attention(self,obj):
+        user = self.context['request'].user
+        if not isinstance(user, AnonymousUser):
+            coon = redis.Redis(connection_pool=POOL)
+            is_attention = coon.sismember('attention:'+str(user.pk),obj.pk)
+            if is_attention:
+                return 1
+            else:
+                return 0
+        else:
+            return 0
 
     def get_head_portrait(self,obj):
             return domain_name+obj.head_portrait.url
 
     class Meta:
         model = User
-        fields = ['id','head_portrait']
+        fields = ['id','head_portrait','is_attention']
 
 
 class UserSearchSerializer(HaystackSerializer):

@@ -1,5 +1,4 @@
 from django.db import models
-import django.utils.timezone as timezone
 
 
 class Question(models.Model):
@@ -59,6 +58,8 @@ class Answer(models.Model):
     user = models.ForeignKey('user.User', on_delete=models.CASCADE, verbose_name='所属用户')
     question = models.ForeignKey('Question', on_delete=models.CASCADE, verbose_name='所属问题')
     content = models.TextField(max_length=100000, verbose_name='用户回答', default='')
+    abstract = models.CharField(max_length=100,verbose_name='回答摘要',default='')
+    first_image = models.URLField(verbose_name='回答第一张图片',null=True)
     is_anonymity = models.IntegerField(choices=((0, '不匿名'), (1, '匿名')), default=0, verbose_name='是否匿名')
     vote_number = models.IntegerField(verbose_name='投票总数', default=0)
     approval_number = models.IntegerField(verbose_name='赞同数', default=0)

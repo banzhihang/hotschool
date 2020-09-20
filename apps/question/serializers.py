@@ -4,7 +4,9 @@ from django.db.models import F
 from rest_framework import serializers
 
 from HotSchool.settings import domain_name, POOL
-from .extra import add_user_operation_data
+from draft.models import AnswerDraft
+from user.models import UserCollectQuestion
+from .extra import add_user_operation_data, get_hot_question_image
 from .models import *
 
 
@@ -14,30 +16,50 @@ class QuestionInfoSerializer(serializers.ModelSerializer):
     modify_time = serializers.DateTimeField(format='%Y-%m-%d %H:%M')
     school = serializers.CharField(source='school.name')
     is_collect = serializers.SerializerMethodField()
-    interest_circle = serializers.SerializerMethodField()
+    has_answer_id = serializers.SerializerMethodField()
+    has_draft_id = serializers.SerializerMethodField()
 
     def get_is_collect(self,obj):
         # 判断用户是游客登陆还是以合法用户身份登录,若用户以游客身份登录,则不查询该用户是否收藏问题,若登陆了则判断
-        if not isinstance(self.context['request'].user,AnonymousUser):
-            user_collects = self.context['request'].user.question_collect.all().values_list('id')
-            for i in user_collects:
-                if obj.pk == i[0]:
-                    return 1
-                else:
-                    continue
-            return 0
+        user = self.context['request'].user
+        if not isinstance(user,AnonymousUser):
+            try:
+                _ = UserCollectQuestion.objects.get(user_id=user.pk,question_id=obj.pk)
+            except UserCollectQuestion.DoesNotExist:
+                return 0
+            else:
+                return 1
         else:
             return 0
 
-    def get_interest_circle(self, obj):
-        interests = obj.interest_circle.all().values_list('name')
-        interests = [i[0] for i in interests]
+    def get_has_answer_id(self,obj):
+        # 判断用户在该回答下是否有回答,没有回答就返回-1,有回答就返回回答id
+        user = self.context['request'].user
+        if not isinstance(user, AnonymousUser):
+            answer_set = Answer.objects.filter(user_id=user.pk,question_id=obj.pk).values_list('id')
+            if answer_set:
+                return answer_set[0][0]
+            else:
+                return -1
+        else:
+            return -1
 
-        return interests
+    def get_has_draft_id(self, obj):
+        # 判断该用户在该回答下是否有草稿,没有草稿就返回-1,有就返回草稿id
+        user = self.context['request'].user
+        if not isinstance(user, AnonymousUser):
+            draft_set = AnswerDraft.objects.filter(user_id=user.pk,question_id=obj.pk).values_list('id')
+            if draft_set:
+                return draft_set[0][0]
+            else:
+                return -1
+        else:
+            return -1
+
 
     class Meta:
         model = Question
-        exclude = ['is_anonymity']
+        exclude = ['is_anonymity','interest_circle']
 
 
 class PostQuestionSerializer(serializers.ModelSerializer):
@@ -97,7 +119,7 @@ class AnswerInfoSerializer(serializers.ModelSerializer):
 
     def get_user(self, answer):
         if answer.is_anonymity:
-            return 'null'
+            return None
         else:
             return answer.user_id
 
@@ -110,7 +132,7 @@ class AnswerInfoSerializer(serializers.ModelSerializer):
 
     def get_user_desc(self, answer):
         if answer.is_anonymity:
-            return 'null'
+            return None
         else:
             return answer.user.desc
 
@@ -183,10 +205,10 @@ class AnswerInfoSerializer(serializers.ModelSerializer):
         exclude = ['vote_number', 'score', 'add_time']
 
 
-class PostAnswerSerializer(serializers.ModelSerializer):
+class PostAndUpdateAnswerSerializer(serializers.ModelSerializer):
     """
     回答发布序列化器
-    必要参数:content(回答内容) is_anonymity(是否匿名回答) user(用户id) question(所属问题id)
+    必要参数:content(回答内容) is_anonymity(是否匿名回答) question(所属问题id)
     选要参数:无
     """
     content = serializers.CharField(required=True, min_length=1, max_length=100000, allow_blank=False, error_messages={
@@ -205,6 +227,9 @@ class PostAnswerSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         question = validated_data.get('question')
         return Answer.objects.create(**validated_data),question
+
+    def update(self, instance, validated_data):
+        return Answer.objects.filter(pk=instance.pk).update(**validated_data)
 
     class Meta:
         model = Answer
@@ -318,16 +343,26 @@ class AnswerBriefSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Answer
-        fields = ['id', 'user_nick_name', 'user_head_portrait',
-                  'modify_time', 'content', 'approval_number', 'comment_number', 'like_number']
+        fields = ['id', 'user_nick_name', 'user_head_portrait','first_image',
+                  'modify_time', 'abstract', 'approval_number', 'comment_number', 'like_number']
 
 
 class HotQuestionSerializer(serializers.ModelSerializer):
     """热榜问题序列化器"""
     school = serializers.CharField(source='school.name')
+    image = serializers.SerializerMethodField()
+
+    # 获得热榜问题的配图
+    def get_image(self,obj):
+        res = get_hot_question_image(obj)
+        if res:
+            return res
+        else:
+            return None
+
     class Meta:
         model = Question
-        fields = ['title', 'id', 'school']
+        fields = ['title', 'id', 'school','image']
 
 
 class  CreateCommentSerializer(serializers.ModelSerializer):

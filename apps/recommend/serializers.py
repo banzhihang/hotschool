@@ -38,7 +38,8 @@ class AnswerRecommendSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Answer
-        fields = ['type','id','question_title','user_head_portrait','user_nick_name','approval_number','comment_number','content']
+        fields = ['type','id','question_title','user_head_portrait','user_nick_name','approval_number',
+                  'comment_number','abstract','first_image']
 
 
 class QuestionRecommendSerializer(serializers.ModelSerializer):

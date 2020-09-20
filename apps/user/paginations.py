@@ -36,7 +36,7 @@ class UserDynamicByTimePagination(UserCreateByTimePagination):
 
 class UserCollectPagination(PageNumberPagination):
     """用户收藏分页器(按redis排序)"""
-    age_size = 10
+    page_size = 10
     max_page_size = 15
 
     def get_paginated_response(self, data):

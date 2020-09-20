@@ -16,3 +16,5 @@ def calculate_food_score(food_id):
     score = wilson_score_food(food[0]['all_score'],food[0]['vote_number'])
     Food.objects.filter(pk=food_id).update(score=score)
     coon.srem('food',food_id)
+
+

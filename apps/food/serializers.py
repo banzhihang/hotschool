@@ -4,6 +4,7 @@ from django.db.models import F
 from rest_framework import serializers
 
 from HotSchool.settings import POOL
+from user.models import UserCollectFood
 from .models import *
 
 
@@ -15,7 +16,11 @@ class FoodRankSerializer(serializers.ModelSerializer):
 
     def get_score(self,obj):
         """将分数值舍入到小数点一位来显示"""
-        return round(obj.score,1)
+        if obj.vote_number <20:
+            return None
+        else:
+
+            return round(obj.score,1)
 
     class Meta:
         model = Food
@@ -34,6 +39,7 @@ class FoodInfoSerializer(serializers.ModelSerializer):
     school = serializers.CharField(source='school.name')
     #吃过的时间
     eat_record = serializers.SerializerMethodField()
+    is_collect = serializers.SerializerMethodField()
 
     def get_flavour(self,obj):
         # 获得美食的标签
@@ -43,7 +49,10 @@ class FoodInfoSerializer(serializers.ModelSerializer):
 
     def get_score(self,obj):
         # 获得该美食的评分
-        return round(obj.score, 1)
+        if obj.vote_number < 20:
+            return None
+        else:
+            return round(obj.score, 1)
 
     def get_eat_record(self,obj):
         # 判断是不是游客
@@ -88,6 +97,18 @@ class FoodInfoSerializer(serializers.ModelSerializer):
             else:
                 return 0
         else: return 0
+
+    def get_is_collect(self,obj):
+        user = self.context['request'].user
+        if not isinstance(user, AnonymousUser):
+            try:
+                _ = UserCollectFood.objects.get(user_id=user.pk,food_id=obj.pk)
+            except UserCollectFood.DoesNotExist:
+                return 0
+            else:
+                return 1
+        else:
+            return 0
 
     class Meta:
         model = Food
@@ -245,7 +266,7 @@ class DiscussRevertInfoSerializer(serializers.ModelSerializer):
 class PostFoodSerializer(serializers.ModelSerializer):
     """
     美食发布序列化器
-    必须字段:name,desc,address,longitude,latitude,flavour(至少两个标签,例子:1,2),image_first,image_second,address_image,school
+    必须字段:name,desc,address,longitude,latitude,flavour(至少两个标签,例子:[1,2]),image_first,image_second,address_image,school
     选要字段:image_third,image_fourth,image_fifth
     """
     name = serializers.CharField(min_length=2,max_length=15,required=True,allow_blank=False,error_messages={
@@ -261,7 +282,7 @@ class PostFoodSerializer(serializers.ModelSerializer):
     address = serializers.CharField(required=True,allow_blank=False,error_messages={'blank':'地址不能为空'})
     longitude = serializers.DecimalField(required=True,max_digits=40,decimal_places=6,error_messages={'required':'经度不能为空'})
     latitude = serializers.DecimalField(required=True,max_digits=40,decimal_places=6,error_messages={'required':'纬度不能为空'})
-    flavour = serializers.CharField()
+    flavour = serializers.ListField(required=True,min_length=2)
     image_first = serializers.URLField(required=True,error_messages={'required':'至少2张图片','invalid':'地址不合法'})
     image_second = serializers.URLField(required=True,error_messages={'required':'至少2张图片','invalid':'地址不合法'})
     image_third = serializers.URLField(required=False,error_messages={'invalid':'地址不合法'})
@@ -270,24 +291,16 @@ class PostFoodSerializer(serializers.ModelSerializer):
     address_image = serializers.URLField(required=True,error_messages={'required':'地址图片不允许为空','invalid':'地址不合法'})
 
     def validate(self,attr):
-        #验证口味
-        flavour_str = attr.pop('flavour',None)
-        if flavour_str:
-            # 将flavour_str拆成列表,查询是否存在该口味
-            flavour_list = flavour_str.split(',')
-            if len(flavour_list) <2:
-                raise serializers.ValidationError('最少两个标签')
-            try:
-                flavour = Flavour.objects.filter(id__in=flavour_list)
-            except:
+        # 验证口味
+        flavour_list = attr.pop('flavour',None)
+        if flavour_list:
+            flavour = Flavour.objects.filter(id__in=flavour_list)
+            # 检查提交的口味标签是否合法
+            if len(flavour_list) != flavour.count():
                 raise serializers.ValidationError('标签异常')
             else:
-                if len(flavour_list) != flavour.count():
-                    raise serializers.ValidationError('标签异常')
-                else:
-                    attr['flavour'] = flavour_list
-        else:
-            raise serializers.ValidationError('标签不允许为空')
+                attr['flavour'] = flavour_list
+
         attr['user'] = self.context['request'].user
         return attr
 

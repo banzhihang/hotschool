@@ -45,3 +45,21 @@ class AnswerPagination(PageNumberPagination):
             ('question', question_data),
             ('answer', answer_data),
         ]), )
+
+
+class CollectCommentByTimePagination(CursorPagination):
+    """我的发布中评论详情分页器"""
+
+    # 每页默认数量
+    page_size = 15
+    # 排序规则
+    ordering = 'add_time'
+    # 每页最大显示数量
+    max_page_size = 25
+
+    def get_paginated_response(self,comment_data, revert_data):
+        return Response(OrderedDict([
+            ('next', self.get_next_link()),
+            ('comment', comment_data),
+            ('revert', revert_data),
+        ]), )

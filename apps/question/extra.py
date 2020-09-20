@@ -1,10 +1,12 @@
 import time
 import datetime
+import re
 
 import redis
+from bs4 import BeautifulSoup
 
 from HotSchool.settings import POOL
-from question.models import Question
+from question.models import Question, Answer
 from question.tasks import calculate_question_and_sync
 from user.tasks import sync_user_operation
 
@@ -109,3 +111,32 @@ def add_user_operation_data(operation, target_user_id, type=None, user_id=None, 
             number = coon.hget('ud:' + today + ':' + str(target_user_id), operation)
             if number != 0:
                 coon.hincrby('ud:' + today + ':' + str(target_user_id), operation, -1)
+
+
+def get_hot_question_image(question_model):
+    """
+    获得热榜问题的配图
+    参数:question_id(问题id)
+    返回值:图片url
+    """
+    coon = redis.Redis(connection_pool=POOL)
+    # 最多检查前50个回答,若前50个回答都没有配图,就不再检查
+    for i in range(5):
+        answer_id_list = coon.zrevrange('answer:score:' + str(question_model.pk), start=i * 10, end=(i + 1) * 10)
+        # 若redis返回的回答列表为空,就说明没有回答了,就返回空
+        if answer_id_list:
+            answer_set = Answer.objects.filter(id__in=answer_id_list).values_list('first_image')
+        else:
+            return None
+        # 检查回答的first_image是否为None,若不是,说明存在图片,直接返回
+        for image in answer_set:
+            if image[0]:
+                return image[0]
+        # 若回答id列表小于10,说明此次redis返回的回答id已到达最末尾几个回答,直接返回
+        if len(answer_id_list) <10:
+            return None
+
+
+
+
+

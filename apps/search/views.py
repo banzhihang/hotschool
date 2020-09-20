@@ -1,7 +1,9 @@
 from drf_haystack.filters import HaystackHighlightFilter
 from drf_haystack.viewsets import HaystackViewSet
+from rest_framework.response import Response
 
 from food.models import Food, Flavour
+from puclic import LooseAuthtication
 from question.models import Question
 from search.filter import SchoolFilter
 from search.paginations import UserSearchPagination, FoodSearchPagination, QuestionSearchPagination, \
@@ -28,6 +30,9 @@ class FoodSearchView(HaystackViewSet):
 
 class UserSearchView(HaystackViewSet):
     """用户搜索视图"""
+
+    # 用户认证
+    authentication_classes = [LooseAuthtication, ]
     index_models = [User]
     serializer_class = UserSearchSerializer
     # 分页器

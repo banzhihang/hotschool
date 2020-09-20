@@ -2,6 +2,7 @@ from datetime import datetime,timedelta
 
 from rest_framework.views import APIView
 
+from draft.models import FoodDraft
 from puclic import LooseAuthtication
 from question.tasks import push_to_user
 from .paginations import *
@@ -62,7 +63,8 @@ class FoodInfoView(APIView):
         else:
             ser = PostFoodSerializer(data=request.data,context={'request': request})
             if ser.is_valid():
-                ser.save()
+                food = ser.save()
+                FoodDraft.objects.filter(name=food.name,address=food.address).delete()
                 return Response({'status':'ok','error':{}})
             else:
                 return Response({'status': 'fail', 'error':ser.errors})

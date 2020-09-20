@@ -1,9 +1,12 @@
+from datetime import datetime,timedelta
+
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_jwt.settings import api_settings
 
 from puclic import Authtication, get_ordering
-from question.serializers import CommentInfoSerializer
+from question.paginations import CollectCommentByTimePagination
+from question.serializers import RevertInfoSerializer
 from .extra import OpenIdAndImage, modify_headimage_name,uuid_string,create_user_dynamic
 from .paginations import UserAttentionPagination, UserCreateByTimePagination, UserCollectPagination, \
     UserDynamicByTimePagination, UserRecentPagination
@@ -108,45 +111,46 @@ class RecentBrowseView(APIView):
         return Response({'status': status})
 
 
-class MyAnswerView(APIView):
-    """用户的回答 评论 回复"""
+class MyPublishView(APIView):
+    """用户的问题,回答,评论,美食"""
     authentication_classes = [Authtication, ]
 
     def get(self, request):
         """
-        获取用户的回答评论回复,type=0, 为回答，1为评论，2为回复
+        获取用户的回答问题美食,type=0为回答，1为问题,2为评论,3为美食
         """
-        type = int(request.query_params['type'])
+        try:
+            type = int(request.GET.get('type'))
+        except:
+            return Response({'error': '发生错误'})
+
         page = UserCreateByTimePagination()
         if type == 0:
             answers = Answer.objects.filter(user=request.user.pk)
             page_roles = page.paginate_queryset(queryset=answers, request=request, view=self)
             answers = UserAnswerInfoSerializer(instance=page_roles, many=True, context={'request': request})
             return page.get_paginated_response(answers.data)
+
         elif type == 1:
-            comments = Comment.objects.filter(user=request.user.pk)
-            page_roles = page.paginate_queryset(queryset=comments, request=request, view=self)
-            comments = CommentInfoSerializer(instance=page_roles, many=True, context={'request': request})
-            return page.get_paginated_response(comments.data)
+            question_set = Question.objects.filter(user=request.user.pk)
+            page_roles = page.paginate_queryset(queryset=question_set, request=request, view=self)
+            questions = UserQuestionCollectSerializer(instance=page_roles, many=True, context={'request': request})
+            return page.get_paginated_response(questions.data)
+
         elif type == 2:
-            reverts = Revert.objects.filter(user=request.user.pk)
-            page_roles = page.paginate_queryset(queryset=reverts, request=request, view=self)
-            reverts = UserRevertInfoSerializer(instance=page_roles, many=True, context={'request': request})
-            return page.get_paginated_response(reverts.data)
+            comment_set = Comment.objects.filter(user=request.user.pk)
+            page_roles = page.paginate_queryset(queryset=comment_set, request=request, view=self)
+            comments = UserCommentInfoSerializer(instance=page_roles, many=True, context={'request': request})
+            return page.get_paginated_response(comments.data)
 
+        elif type == 3:
+            foods_set = Food.objects.filter(user=request.user.pk)
+            page_roles = page.paginate_queryset(queryset=foods_set, request=request, view=self)
+            foods = UserFoodInfoSerializer(instance=page_roles, many=True, context={'request': request})
+            return page.get_paginated_response(foods.data)
 
-class MyQuestionView(APIView):
-    """用户的问题"""
-    authentication_classes = [Authtication, ]
-
-    def get(self, request):
-        """获取用户的问题"""
-        # 获得问题的queryset
-        question = Question.objects.filter(user=request.user.pk)
-        # 序列化
-        questions = UserQuestionCollectSerializer(instance=question, many=True)
-
-        return Response(questions.data)
+        else:
+            return Response({'error': '发生错误'})
 
 
 class MyCollectView(APIView):
@@ -155,24 +159,40 @@ class MyCollectView(APIView):
 
     def get(self, request):
         """
-        获取用户的收藏,type为0为问题，为1则为回答
+        获取用户的收藏,type为0为问题，为1则为回答,2为美食
         """
-        type = int(request.GET.get('type'))
-        if type == 0:
-            questions = request.user.question_collect.all()
-            # 分页
-            page = UserCreateByTimePagination()
-            page_roles = page.paginate_queryset(queryset=questions, request=request, view=self)
-            questions = UserQuestionCollectSerializer(instance=page_roles, many=True)
-            return page.get_paginated_response(questions.data)
+        try:
+            type = int(request.GET.get('type'))
+        except:
+            return Response({'error': '发生错误'})
         else:
-            coon = redis.Redis(connection_pool=POOL)
-            answers_id_list = coon.smembers('collect:' + str(request.user.pk))
-            answers_set = Answer.objects.filter(pk__in=answers_id_list)
-            page = UserCollectPagination()
-            page_roles = page.paginate_queryset(queryset=answers_set, request=request, view=self)
-            answers = UserAnswerCollectSerializer(instance=page_roles, many=True)
-            return page.get_paginated_response(answers.data)
+            if type == 0:
+                questions = request.user.question_collect.all()
+                # 分页
+                page = UserCreateByTimePagination()
+                page_roles = page.paginate_queryset(queryset=questions, request=request, view=self)
+                questions = UserQuestionCollectSerializer(instance=page_roles, many=True)
+                return page.get_paginated_response(questions.data)
+
+            elif type == 1:
+                coon = redis.Redis(connection_pool=POOL)
+                answers_id_list = coon.smembers('collect:' + str(request.user.pk))
+                answers_set = Answer.objects.filter(pk__in=answers_id_list)
+                page = UserCollectPagination()
+                page_roles = page.paginate_queryset(queryset=answers_set, request=request, view=self)
+                answers = UserAnswerCollectSerializer(instance=page_roles, many=True)
+                return page.get_paginated_response(answers.data)
+
+            elif type == 2:
+                user = request.user
+                foods_set = UserCollectFood.objects.filter(user=user.pk)
+                page = UserCreateByTimePagination()
+                page_roles = page.paginate_queryset(queryset=foods_set, request=request, view=self)
+                foods = UserFoodCollectSerializer(instance=page_roles, many=True)
+                return page.get_paginated_response(foods.data)
+
+            else:
+                return Response({'error': '发生错误'})
 
 
 class MyAttentionView(APIView):
@@ -214,7 +234,7 @@ class UserDynamicView(APIView):
         create_user_dynamic(user_id)
         user_dynamic_set = UserDynamic.objects.filter(user=user_id).select_related('answer')
         if not user_dynamic_set:
-            return Response({'next': 'null', 'result': 'null'})
+            return Response({'next': None, 'result': None})
         else:
             page = UserDynamicByTimePagination()
             page_roles = page.paginate_queryset(queryset=user_dynamic_set, request=request, view=self)
@@ -246,5 +266,62 @@ class UserAttention(APIView):
             return page.get_paginated_response(attentions.data)
         else:
             return Response({'status': 'fail', 'error': '发生错误'})
+
+
+class UserCreatorDataView(APIView):
+    """用户昨天的创作者数据"""
+    authentication_classes = [Authtication, ]
+
+    def get(self,request):
+        """获得用户昨日的创作者数据"""
+        user_id = request.user.pk
+        yesterday = (datetime.now() - timedelta(days=1)).strftime('%Y%m%d') # 昨天的时间字符串
+        coon = redis.Redis(connection_pool=POOL)
+        is_exist = coon.exists('ud:'+yesterday+':'+str(user_id))
+        if is_exist:
+            user_data = coon.hmget('ud:' + yesterday + ':' + str(user_id), 'read', 'approval', 'like', 'collect','attention')
+            data = {
+                'read':int(user_data[0]),
+                'approval':int(user_data[1]),
+                'like':int(user_data[2]),
+                'collect':int(user_data[3]),
+                'attention':int(user_data[4])
+            }
+            return Response(data)
+        else:
+            return Response({})
+
+
+class CollectCommentInfoView(APIView):
+    """我的发布中评论详情"""
+    authentication_classes = [Authtication, ]
+
+    def get(self,request):
+        """获得评论详情"""
+        comment_id = request.GET.get('comment')
+        cursor = request.GET.get('cursor')
+        if comment_id:
+            try:
+                comment_set = Comment.objects.get(pk=comment_id)
+            except Comment.DoesNotExist:
+                return Response({"error":'没有该评论'})
+            else:
+                revert_set = Revert.objects.filter(comment_id=comment_id)
+                page = CollectCommentByTimePagination()
+                page_roles = page.paginate_queryset(queryset=revert_set, request=request, view=self)
+                reverts = RevertInfoSerializer(instance=page_roles, many=True, context={'request': request})
+                # 若不存在cursor,则说明请求的是第一页,返回评论数据,若存在cursor,则说明不是第一页,返回的数据中commnet为{}
+                if not cursor:
+                    comment = CollectCommentInfoSerializer(instance=comment_set,many=False,context={'request': request})
+                    return page.get_paginated_response(comment.data,reverts.data)
+                else:
+                    return page.get_paginated_response({}, reverts.data)
+        else:
+            return Response({})
+
+
+
+
+
 
 

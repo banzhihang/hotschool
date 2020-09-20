@@ -1,7 +1,9 @@
+import re
 import time
 from datetime import datetime,timedelta
 
 import redis
+from bs4 import BeautifulSoup
 from celery import shared_task
 from celery.schedules import crontab
 from celery.task import periodic_task
@@ -158,4 +160,31 @@ def calculate_school_hot_rank(school_id):
         coon.zremrangebyrank('hot:' + str(school_id) + ':' + today, min=0, max=zset_number - 15 - 1)
 
 
+@shared_task
+def get_answer_abstract_and_first_image(answer_id):
+    """
+    获得回答的摘要和第一张图片,并添加到数据库
+    参数:回答id
+    返回值:无
+    """
+    # 获得回答的content
+    try:
+        answer = Answer.objects.get(pk=int(answer_id))
+    except Answer.DoesNotExist:
+        pass
+    else:
+        html = answer.content
+        pattern = re.compile("img src='(.*?)'")
+        # 获得第一张图片
+        img_url = pattern.search(html)
+        # 获得回答摘要
+        clean_text = BeautifulSoup(html, "lxml").get_text(strip=True)
+        if img_url:
+            # 保存至数据库
+            answer.first_image = img_url[1]
+            answer.abstract = clean_text[0:40]
+            answer.save()
+        else:
+            answer.abstract = clean_text[0:40]
+            answer.save()
 

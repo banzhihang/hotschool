@@ -68,6 +68,7 @@ class Discuss(models.Model):
         verbose_name = '讨论'
         verbose_name_plural = verbose_name
 
+
 class FoodComment(models.Model):
     """评论表"""
     user = models.ForeignKey('user.User', on_delete=models.CASCADE, verbose_name='所属用户')
@@ -81,6 +82,7 @@ class FoodComment(models.Model):
         verbose_name = '讨论评论'
         verbose_name_plural = verbose_name
 
+
 class FoodRevert(models.Model):
     """美食讨论回复表"""
     user = models.ForeignKey('user.User', on_delete=models.CASCADE, verbose_name='所属用户',related_name='user')
@@ -93,6 +95,7 @@ class FoodRevert(models.Model):
     class Meta:
         verbose_name = '讨论回复'
         verbose_name_plural = verbose_name
+
 
 class FoodMark(models.Model):
     """用户评分表"""

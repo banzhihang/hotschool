@@ -10,6 +10,7 @@ from puclic import Authtication
 from question.extra import add_question_operation_data, add_user_operation_data
 from question.models import Comment, Revert
 from question.tasks import push_to_user
+from user.models import UserCollectFood, UserCollectQuestion
 
 
 class ApprovalView(APIView):
@@ -266,6 +267,7 @@ class CollectView(APIView):
         """
         answer_id = request.GET.get('answer')
         question_id = request.GET.get('question')
+        food_id =request.GET.get('food')
         user = request.user
         user_id = request.user.pk
         coon = redis.Redis(connection_pool=POOL)
@@ -299,30 +301,32 @@ class CollectView(APIView):
                     add_user_dynamic(operation='add',type=1,user_id=user_id,answer_id=answer_id)
 
             elif question_id:
-                # 查询改用收藏过的所有问题,(多对对字段)
-                user_collect = user.question_collect.all().values_list('id')
-                # flag初始为0,若该用户收藏过,则被置为1
-                flag = 0
                 question_id = int(question_id)
-                # 一个一个检查是否收藏过
-                for i in user_collect:
-                    if question_id == i[0]:
-                        # 收藏过,则这次操作为取消收藏,该多对多字段移除该问题id
-                        user.question_collect.remove(question_id)
-                        # 减少该问题的关注量
-                        add_question_operation_data('attention', question_id, 'reduce')
-                        # 删除该条动态
-                        add_user_dynamic(operation='delete',type=3,user_id=user_id,question_id=question_id)
-                        flag = 1
-                        # 直接跳出循环
-                        break
-                if flag == 0:
-                    # 若没有搜藏过,添加该id
-                    user.question_collect.add(question_id)
+                try:
+                    is_collect = UserCollectQuestion.objects.get(user_id=user_id,question_id=question_id)
+                except UserCollectQuestion.DoesNotExist:
+                    UserCollectQuestion.objects.create(user_id=user_id,question_id=question_id)
                     # 增加该问题收藏量
-                    add_question_operation_data('attention',question_id,'add')
+                    add_question_operation_data('attention', question_id, 'add')
                     # 创建动态
-                    add_user_dynamic(operation='add',type=3,user_id=user_id,question_id=question_id)
+                    add_user_dynamic(operation='add', type=3, user_id=user_id, question_id=question_id)
+                else:
+                    is_collect.delete()
+                    # 减少该问题的关注量
+                    add_question_operation_data('attention', question_id, 'reduce')
+                    # 删除该条动态
+                    add_user_dynamic(operation='delete', type=3, user_id=user_id, question_id=question_id)
+
+            # 美食收藏
+            elif food_id:
+                food_id = int(food_id)
+                try:
+                    is_collect = UserCollectFood.objects.get(user_id=user_id,food_id=food_id)
+                except UserCollectFood.DoesNotExist:
+                    UserCollectFood.objects.create(user_id=user_id,food_id=food_id)
+                else:
+                    is_collect.delete()
+
         except Exception:
             return Response({'status':'fail', 'error': '发生错误'})
         else:

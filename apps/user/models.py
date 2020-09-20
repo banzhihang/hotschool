@@ -11,9 +11,6 @@ class User(AbstractUser):
     address = models.CharField(max_length=50, verbose_name='所在地', default='')
     desc = models.CharField(max_length=50, verbose_name='自我描述', default='')
     school = models.ForeignKey('School', verbose_name='学校', on_delete=models.CASCADE, null=True)
-    question_collect = models.ManyToManyField('question.Question', verbose_name='用户问题收藏',
-                                              related_name='question_collect')
-    interest = models.ManyToManyField('Interest', verbose_name='用户兴趣')
     add_time = models.DateField(verbose_name='添加时间', auto_now_add=True)
 
     class Meta:
@@ -23,7 +20,7 @@ class User(AbstractUser):
 
 class School(models.Model):
     """学校表"""
-    name = models.CharField(max_length=20, verbose_name='学校名', default='')
+    name = models.CharField(max_length=20, verbose_name='学校名', default='',db_index=True)
     is_campus = models.IntegerField(choices=((0, '不是校区'), (1, '是校区')), default=0, verbose_name='是否是一个校区')
     desc = models.CharField(max_length=100, verbose_name='描述', default='')
 
@@ -69,3 +66,17 @@ class UserDynamic(models.Model):
     class Meta:
         verbose_name = '用户动态'
         verbose_name_plural = verbose_name
+
+
+class UserCollectFood(models.Model):
+    """用户收藏美食"""
+    user = models.ForeignKey('user.User', on_delete=models.CASCADE, verbose_name='所属用户')
+    food = models.ForeignKey('food.Food', on_delete=models.CASCADE, verbose_name='所属美食')
+    add_time = models.DateTimeField(verbose_name='添加时间', auto_now_add=True,db_index=True)
+
+
+class UserCollectQuestion(models.Model):
+    """用户问题收藏"""
+    user = models.ForeignKey('user.User', on_delete=models.CASCADE, verbose_name='所属用户')
+    question = models.ForeignKey('question.Question', on_delete=models.CASCADE, verbose_name='所属问题')
+    add_time = models.DateTimeField(verbose_name='添加时间', auto_now_add=True,db_index=True)

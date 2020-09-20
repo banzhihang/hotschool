@@ -1,5 +1,6 @@
 from django.db import models
 
+
 class AnswerDraft(models.Model):
     """回答草稿表"""
     user = models.ForeignKey('user.User', on_delete=models.CASCADE, verbose_name='所属的用户')
@@ -17,7 +18,7 @@ class AnswerDraft(models.Model):
 class FoodDraft(models.Model):
     """美食草稿表"""
     user = models.ForeignKey('user.User', on_delete=models.CASCADE, verbose_name='该美食的作者')
-    name = models.CharField(max_length=20, verbose_name='美食名称')
+    name = models.CharField(max_length=20, verbose_name='美食名称',db_index=True)
     image_first = models.URLField(verbose_name='图片url',null=True)
     image_second = models.URLField(verbose_name='图片url',null=True)
     image_third = models.URLField(verbose_name='图片url', null=True)
@@ -25,7 +26,7 @@ class FoodDraft(models.Model):
     image_fifth = models.URLField(verbose_name='图片url', null=True)
     address_image = models.URLField(verbose_name='图片url', null=True)
     desc = models.CharField(max_length=150, verbose_name='美食简短描述',null=True)
-    address = models.CharField(max_length=50, verbose_name='美食地址')
+    address = models.CharField(max_length=50, verbose_name='美食地址',db_index=True)
     longitude = models.DecimalField(max_digits=40, decimal_places=6, verbose_name='地点的经度')
     latitude = models.DecimalField(max_digits=40, decimal_places=6, verbose_name='地点的维度')
     flavour = models.ManyToManyField('food.Flavour', verbose_name='美食的味道')
