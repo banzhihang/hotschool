@@ -15,6 +15,9 @@ class Question(models.Model):
     add_time = models.DateField(verbose_name='问题发布时间', auto_now_add=True)
     modify_time = models.DateTimeField(verbose_name='修改时间',auto_now = True)
 
+    def __str__(self):
+        return self.title
+
     class Meta:
         verbose_name = '问题'
         verbose_name_plural = verbose_name
@@ -29,6 +32,9 @@ class Comment(models.Model):
     revert_number = models.IntegerField(verbose_name='回复数数', default=0)
     approval_number = models.IntegerField(verbose_name='获赞数', default=0,db_index=True)
     add_time = models.DateTimeField(auto_now_add=True, verbose_name='添加时间',db_index=True)
+
+    def __str__(self):
+        return self.user.nick_name
 
     class Meta:
         verbose_name = '评论'
@@ -48,6 +54,10 @@ class Revert(models.Model):
     approval_number = models.IntegerField(verbose_name='获赞数', default=0)
     add_time = models.DateTimeField(auto_now_add=True, verbose_name='添加时间',db_index=True)
 
+
+    def __str__(self):
+        return self.user.nick_name
+
     class Meta:
         verbose_name = '回复'
         verbose_name_plural = verbose_name
@@ -59,7 +69,7 @@ class Answer(models.Model):
     question = models.ForeignKey('Question', on_delete=models.CASCADE, verbose_name='所属问题')
     content = models.TextField(max_length=100000, verbose_name='用户回答', default='')
     abstract = models.CharField(max_length=100,verbose_name='回答摘要',default='')
-    first_image = models.URLField(verbose_name='回答第一张图片',null=True)
+    first_image = models.URLField(verbose_name='回答第一张图片',null=True,max_length=300)
     is_anonymity = models.IntegerField(choices=((0, '不匿名'), (1, '匿名')), default=0, verbose_name='是否匿名')
     vote_number = models.IntegerField(verbose_name='投票总数', default=0)
     approval_number = models.IntegerField(verbose_name='赞同数', default=0)
@@ -69,6 +79,10 @@ class Answer(models.Model):
     collect_number = models.IntegerField(verbose_name='收藏数', default=0)
     add_time = models.DateTimeField(auto_now_add=True, verbose_name='添加时间',db_index=True)
     modify_time = models.DateTimeField(verbose_name='修改时间',auto_now = True)
+
+
+    def __str__(self):
+        return self.question.title
 
     class Meta:
         verbose_name = '回答'

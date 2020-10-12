@@ -173,3 +173,22 @@ POOL = redis.ConnectionPool(host='127.0.0.1', port=6379,db=1,decode_responses=Tr
 coon = redis.Redis(connection_pool=POOL)
 answer_id = coon.zrange('answer:score:2',start=100,end=100)
 print(answer_id)
+
+
+# def get_openid_image(self):
+#     openid_url = self.openid_url + "?appid=" + self.app_id + "&secret=" + self.app_secret + \
+#                  "&js_code=" + self.code + "&grant_type=authorization_code"
+#     res1 = requests.get(openid_url)
+#     res2 = requests.get(self.img_url)
+#     try:
+#         openid = res1.json()['openid']
+#         # 图像内容为二进制格式，要转换成django InMemoryUploadedFile类型
+#         res3 = res2.content
+#         image = BytesIO(res3)
+#         # 改变图片的名字，用正则表达式匹配图像type,使用随机字符串代替原名字
+#         image_type = res2.headers.get("Content-Type")
+#         pattern = re.compile('[^/]+$')
+#         # 获得图像格式
+#         tail = re.findall(pattern, image_type)
+#         image = InMemoryUploadedFile(image, None, uuid_string()
+#                                      + '.' + tail[0], None, len(res3), None, None)

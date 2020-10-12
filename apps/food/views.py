@@ -3,7 +3,7 @@ from datetime import datetime,timedelta
 from rest_framework.views import APIView
 
 from draft.models import FoodDraft
-from puclic import LooseAuthtication
+from puclic import LooseAuthtication, verify_view, check_undefined
 from question.tasks import push_to_user
 from .paginations import *
 from .serializers import *
@@ -13,6 +13,7 @@ from .tasks import calculate_food_score
 class FoodView(APIView):
     """美食排行视图"""
 
+    @check_undefined
     def get(self, request):
         """
         获取美食排行
@@ -43,6 +44,7 @@ class FoodInfoView(APIView):
     """美食详情视图"""
     authentication_classes = [LooseAuthtication, ]
 
+    @check_undefined
     def get(self, request):
         """获取美食详情"""
         food_id = request.GET.get('food')
@@ -56,24 +58,23 @@ class FoodInfoView(APIView):
             except Exception:
                 return Response({'error': '发生错误'})
 
+    @verify_view
     def post(self,request):
         """发布美食"""
-        if isinstance(request.user, AnonymousUser):
-            return Response({'error':'未登录'})
+        ser = PostFoodSerializer(data=request.data,context={'request': request})
+        if ser.is_valid():
+            food = ser.save()
+            FoodDraft.objects.filter(name=food.name,address=food.address).delete()
+            return Response({'status':'ok','error':{}})
         else:
-            ser = PostFoodSerializer(data=request.data,context={'request': request})
-            if ser.is_valid():
-                food = ser.save()
-                FoodDraft.objects.filter(name=food.name,address=food.address).delete()
-                return Response({'status':'ok','error':{}})
-            else:
-                return Response({'status': 'fail', 'error':ser.errors})
+            return Response({'status': 'fail', 'error':ser.errors})
 
 
 class ShortCommentView(APIView):
     """美食短评表"""
     authentication_classes = [LooseAuthtication, ]
 
+    @check_undefined
     def get(self, request):
         """
         获取美食短评
@@ -98,30 +99,29 @@ class ShortCommentView(APIView):
         else:
             return Response({'error': '没有id'})
 
+    @verify_view
     def post(self,request):
         """发布短评"""
-        if isinstance(request.user, AnonymousUser):
-            return Response({'error':'未登录'})
+        ser = PostShortCommentSerializer(data=request.data,context={'request': request})
+        if ser.is_valid():
+            _,food_id = ser.save()
+            coon = redis.Redis(connection_pool=POOL)
+            # 判断还未更新分数的set 里面有没有该美食, 有的话直接跳过,没有的话添加定时任务并将该id添加到未更新分数的食物set
+            is_exists = coon.sismember('food',food_id)
+            if not is_exists:
+                coon.sadd('food',food_id)
+                execute_time = datetime.utcfromtimestamp((datetime.now()+timedelta(minutes=10)).timestamp())
+                #  十分钟后执行
+                calculate_food_score.apply_async(args=[food_id],eta=execute_time)
+            return Response({'status': 'ok', 'error': {}})
         else:
-            ser = PostShortCommentSerializer(data=request.data,context={'request': request})
-            if ser.is_valid():
-                _,food_id = ser.save()
-                coon = redis.Redis(connection_pool=POOL)
-                # 判断还未更新分数的set 里面有没有该美食, 有的话直接跳过,没有的话添加定时任务并将该id添加到未更新分数的食物set
-                is_exists = coon.sismember('food',food_id)
-                if not is_exists:
-                    coon.sadd('food',food_id)
-                    execute_time = datetime.utcfromtimestamp((datetime.now()+timedelta(minutes=10)).timestamp())
-                    #  十分钟后执行
-                    calculate_food_score.apply_async(args=[food_id],eta=execute_time)
-                return Response({'status': 'ok', 'error': {}})
-            else:
-                return Response({'status': 'fail', 'error': ser.errors})
+            return Response({'status': 'fail', 'error': ser.errors})
 
 
 class DiscussRankView(APIView):
     """美食讨论视图"""
 
+    @check_undefined
     def get(self, request):
         """
         获取讨论排行
@@ -129,7 +129,10 @@ class DiscussRankView(APIView):
         """
         # type为0就是按评论数排序,为1就是按时间排序
         food_id = request.GET.get('food')
-        type = int(request.GET.get('type', 0))
+        try:
+            type = int(request.GET.get('type', 0))
+        except:
+            return Response('发生错误')
         if food_id:
             try:
                 discuss_set = Discuss.objects.filter(food=food_id)
@@ -151,6 +154,7 @@ class DiscussInfoView(APIView):
     """讨论详情视图"""
     authentication_classes = [LooseAuthtication, ]
 
+    @check_undefined
     def get(self,request):
         """获取讨论详情"""
         discuss_id = request.GET.get('discuss')
@@ -164,25 +168,24 @@ class DiscussInfoView(APIView):
         else:
             return Response({'error': '没有id'})
 
+    @verify_view
     def post(self,request):
         """发布讨论"""
-        if isinstance(request.user, AnonymousUser):
-            return Response({'error':'未登录'})
+        ser = PostDiscussSerializer(data=request.data,context={'request': request})
+        if ser.is_valid():
+            ser.save()
+            return Response({'status': 'ok', 'error': {}})
         else:
-            ser = PostDiscussSerializer(data=request.data,context={'request': request})
-            if ser.is_valid():
-                ser.save()
-                return Response({'status': 'ok', 'error': {}})
-            else:
-                return Response({'status': 'fail', 'error': ser.errors})
+            return Response({'status': 'fail', 'error': ser.errors})
 
+
+    @check_undefined
+    @verify_view
     def delete(self,request):
         """
         删除讨论
         参数:discuss(讨论id)
         """
-        if isinstance(request.user, AnonymousUser):
-            return Response({'error':'未登录'})
         discuss_id = request.GET.get('discuss')
         if discuss_id:
             try:
@@ -204,13 +207,14 @@ class DiscussInfoView(APIView):
             except:
                 return Response({'status': 'fail', 'error': '发生错误'})
         else:
-            return Response({'error': '没有id'})
+            return Response({'status':'fail','error': '没有id'})
 
 
 class FoodCommentView(APIView):
     """美食评论视图"""
     authentication_classes = [LooseAuthtication, ]
 
+    @check_undefined
     def get(self, request):
         """获取评论"""
         discuss_id = request.GET.get('discuss')
@@ -230,23 +234,21 @@ class FoodCommentView(APIView):
         else:
             return Response({'error': '没有id'})
 
+    @verify_view
     def post(self,request):
         """发布评论"""
-        if isinstance(request.user, AnonymousUser):
-            return Response({'error':'未登录'})
+        ser = PostDiscussCommentSerializer(data=request.data,context={'request': request})
+        if ser.is_valid():
+            comment,target_user_id = ser.save()
+            push_to_user.delay(request.user,target_user_id,4,comment)
+            return Response({'status': 'ok', 'error': ''})
         else:
-            ser = PostDiscussCommentSerializer(data=request.data,context={'request': request})
-            if ser.is_valid():
-                comment,target_user_id = ser.save()
-                push_to_user.delay(request.user,target_user_id,4,comment)
-                return Response({'status': 'ok', 'error': ''})
-            else:
-                return Response({'status': 'fail', 'error': ser.errors})
+            return Response({'status': 'fail', 'error': ser.errors})
 
+    @check_undefined
+    @verify_view
     def delete(self,request):
         """删除评论"""
-        if isinstance(request.user, AnonymousUser):
-            return Response({'error':'未登录'})
         comment_id = request.GET.get('comment')
         if comment_id:
             try:
@@ -264,13 +266,14 @@ class FoodCommentView(APIView):
             except:
                 return Response({'status': 'fail', 'error': '发生错误'})
         else:
-            return Response({'error': '没有id'})
+            return Response({'status':'fail','error': '没有id'})
 
 
 class FoodRevertView(APIView):
     """美食回复视图"""
     authentication_classes = [LooseAuthtication, ]
 
+    @check_undefined
     def get(self,request,):
         """获取美食回复"""
         comment_id = request.GET.get('comment')
@@ -282,25 +285,23 @@ class FoodRevertView(APIView):
 
             return page.get_paginated_response(revert.data)
 
+    @verify_view
     def post(self,request):
         """发布回复"""
-        if isinstance(request.user, AnonymousUser):
-            return Response({'error':'未登录'})
+        ser = PostDiscussRevertSerializer(data=request.data,context={'request': request})
+        if ser.is_valid():
+            revert,target_user_id = ser.save()
+            push_to_user(request.user,target_user_id,5,revert)
+            return Response({'status': 'ok', 'error': ''})
         else:
-            ser = PostDiscussRevertSerializer(data=request.data,context={'request': request})
-            if ser.is_valid():
-                revert,target_user_id = ser.save()
-                push_to_user(request.user,target_user_id,5,revert)
-                return Response({'status': 'ok', 'error': ''})
-            else:
-                return Response({'status': 'fail', 'error': ser.errors})
+            return Response({'status': 'fail', 'error': ser.errors})
 
+    @check_undefined
+    @verify_view
     def delete(self,request):
         """
         删除回复 参数,revert_id
         """
-        if isinstance(request.user, AnonymousUser):
-            return Response({'error':'未登录'})
         revert_id = request.GET.get('revert')
         if revert_id:
             try:
@@ -318,4 +319,4 @@ class FoodRevertView(APIView):
             except:
                 return Response({'status': 'fail', 'error': '发生错误'})
         else:
-            return Response({'error': '没有id'})
+            return Response({'status':'fail','error': '没有id'})

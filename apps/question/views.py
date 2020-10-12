@@ -2,14 +2,13 @@ from datetime import datetime, timedelta
 import time
 
 import redis
-from django.contrib.auth.models import AnonymousUser
 from django.db.models import F
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from HotSchool.settings import POOL
 from draft.models import AnswerDraft
-from puclic import get_ordering, LooseAuthtication, Authtication
+from puclic import get_ordering, LooseAuthtication, Authtication, verify_view, check_undefined
 from .extra import add_question_operation_data, add_user_operation_data
 from .models import *
 from .paginations import RevertByTimePagination, CommentByTimePagination, AnswerPagination
@@ -22,6 +21,7 @@ from .tasks import push_to_user, get_answer_abstract_and_first_image
 class HotQuestionView(APIView):
     """热门问题视图"""
 
+    @check_undefined
     def get(self, request):
         """获取热榜问题"""
         school_id = int(request.GET.get('school', 0))
@@ -55,6 +55,7 @@ class QuestionView(APIView):
     """问题视图"""
     authentication_classes = [LooseAuthtication, ]
 
+    @check_undefined
     def get(self, request):
         """
         获取问题详情
@@ -108,10 +109,9 @@ class QuestionView(APIView):
                 'answer': []
             })
 
+    @verify_view
     def post(self, request):
         """发布问题"""
-        if isinstance(request.user, AnonymousUser):
-            return Response({'error': '未登录'})
         ser = PostQuestionSerializer(data=request.data, context={'request': request})
         if ser.is_valid():
             question = ser.save()
@@ -126,8 +126,9 @@ class QuestionView(APIView):
 
 class AnswerView(APIView):
     """回答视图"""
-    authentication_classes = [Authtication, ]
+    authentication_classes = [LooseAuthtication, ]
 
+    @check_undefined
     def get(self, request):
         """
         获取回答详情
@@ -151,12 +152,16 @@ class AnswerView(APIView):
             # type为0,为默认排序,为 1则为时间排序
             if int(type) == 0:
                 index = coon.zrevrank('answer:score:' + str(question), str(answer_id))
-                next_answer_list = coon.zrevrange('answer:score:' + str(question), start=index + 1,
-                                                  end=index + 1)
+                if index:
+                    next_answer_list = coon.zrevrange('answer:score:' + str(question), start=index + 1,end=index + 1)
+                else:
+                    next_answer_list = []
             else:
                 index = coon.zrevrank('answer:time:' + str(question), str(answer_id))
-                next_answer_list = coon.zrevrange('answer:time:' + str(question), start=index + 1,
-                                                  end=index + 1)
+                if index:
+                    next_answer_list = coon.zrevrange('answer:time:' + str(question), start=index + 1,end=index + 1)
+                else:
+                    next_answer_list = []
 
             # redis的zrevrange方法返回的是一个列表
             if next_answer_list:
@@ -167,9 +172,10 @@ class AnswerView(APIView):
 
             return Response({'result': answer.data, 'next': next_answer, 'error': ''})
 
+    @check_undefined
+    @verify_view
     def delete(self, request):
         """ 删除回答"""
-        user_id = request.user.pk
         try:
             answer_id = request.GET.get('answer')
             answer = Answer.objects.select_related('user').get(pk=answer_id)
@@ -178,7 +184,7 @@ class AnswerView(APIView):
         else:
             coon = redis.Redis(connection_pool=POOL)
             # 判断是不是作者本人
-            if answer.user.pk == user_id:
+            if answer.user.pk == request.user.pk:
                 answer.delete()
                 # 删除回答的喜欢bzitmap和留存在redis中的数据
                 coon.delete('al:' + str(answer_id), 'ad:' + str(answer_id))
@@ -189,10 +195,11 @@ class AnswerView(APIView):
                 # 将问题的回答数减一
                 question.answer_number = F('answer_number') - 1
                 question.save()
-                return Response({'msg': 'ok', 'error': ''})
+                return Response({'status': 'ok', 'error': ''})
             else:
-                return Response({'msg': 'fail', 'error': '只有作者可以删除'})
+                return Response({'status': 'fail', 'error': '只有作者可以删除'})
 
+    @verify_view
     def post(self, request):
         """发布回答"""
         ser = PostAndUpdateAnswerSerializer(data=request.data, context={'request': request})
@@ -215,6 +222,8 @@ class AnswerView(APIView):
         else:
             return Response({'status': 'fail', 'error': ser.errors})
 
+
+    @verify_view
     def put(self,request):
         """修改回答"""
         answer_id = request.GET.get('answer')
@@ -242,8 +251,9 @@ class AnswerView(APIView):
 
 class CommentView(APIView):
     """回答评论视图"""
-    authentication_classes = [Authtication, ]
+    authentication_classes = [LooseAuthtication, ]
 
+    @check_undefined
     def get(self, request):
         """
         获取回答或者问题的评论
@@ -252,10 +262,11 @@ class CommentView(APIView):
         answer_id = request.GET.get('answer')
         cursor = request.GET.get('cursor')
 
-        if answer_id:
-            answer_id = int(answer_id)
-            comment_set = Comment.objects.filter(answer=answer_id)
+        if not answer_id:
+            return Response({'error':'没有id'})
 
+        answer_id = int(answer_id)
+        comment_set = Comment.objects.filter(answer=answer_id)
         page = CommentByTimePagination()
         page_roles = page.paginate_queryset(queryset=comment_set, request=request, view=self)
         comments = CommentInfoSerializer(instance=page_roles, many=True, context={'request': request})
@@ -273,6 +284,7 @@ class CommentView(APIView):
         else:
             return page.get_paginated_response(comments.data, [])
 
+    @verify_view
     def post(self, request):
         """ 发布评论"""
         ser = CreateCommentSerializer(data=request.data, context={'request': request})
@@ -285,10 +297,11 @@ class CommentView(APIView):
         else:
             return Response({'status': 'fail', 'error': ser.errors})
 
+    @check_undefined
+    @verify_view
     def delete(self, request):
         """删除评论"""
         comment_id = request.GET.get('comment')
-        user_id = request.user.pk
         if comment_id:
             comment_id = int(comment_id)
             try:
@@ -297,7 +310,7 @@ class CommentView(APIView):
                 return Response({'status': 'fail', 'error': '该id不合法'})
             else:
                 # 判断该批评论的作者是不是该用户,只有作者本人能删
-                if commnet.user.pk == user_id:
+                if commnet.user.pk == request.user.pk:
                     commnet.delete()
                     # 将对应回答的评论数减一
                     answer = Answer.objects.get(pk=commnet.answer_id)
@@ -312,8 +325,9 @@ class CommentView(APIView):
 
 class RevertView(APIView):
     """回复视图"""
-    authentication_classes = [Authtication, ]
+    authentication_classes = [LooseAuthtication, ]
 
+    @check_undefined
     def get(self, request):
         """
         获取回复
@@ -328,6 +342,8 @@ class RevertView(APIView):
 
         return page.get_paginated_response(reverts.data)
 
+    @check_undefined
+    @verify_view
     def delete(self, request):
         """删除回复"""
         revert_id = request.GET.get('revert')
@@ -351,6 +367,7 @@ class RevertView(APIView):
         else:
             return Response({'status': 'fail', 'error': '没有id'})
 
+    @verify_view
     def post(self, request):
         """ 发布回复"""
         # 增加对应评论的回复数放在序列化器中进行

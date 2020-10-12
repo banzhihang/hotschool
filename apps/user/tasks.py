@@ -2,18 +2,19 @@ from datetime import datetime,timedelta
 import json
 
 import redis
-from celery import shared_task
 from django.db.models import F
 
+from HotSchool.celery import app
 from HotSchool.settings import POOL
 from question.models import Answer, Question
 from user.models import User, UserDynamic, UserData
 
 
-@shared_task
+@app.task
 def sync_user_dynamic(user_id):
     """
-    同步用户的动态(30分钟之后执行)
+    同步用户的动态
+    执行时间:(30分钟之后执行)
     参数:user_id(用户id)
     返回值:无
     """
@@ -62,7 +63,7 @@ def sync_user_dynamic(user_id):
             UserDynamic.objects.bulk_create(dynamics)
 
 
-@shared_task
+@app.task
 def sync_user_operation(user_id):
     """
     同步用户的创作者数据

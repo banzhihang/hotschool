@@ -5,13 +5,14 @@ from draft.models import AnswerDraft, FoodDraft
 from draft.paginations import AnswerDraftByTimePagination, FoodDraftByTimePagination
 from draft.serializers import AnswerDraftInfoSerializer, PostAnswerDraftInfoSerializer, MyAnswerDraftSerializer, \
     MyFoodDraftSerializer, FoodDraftInfoSerializer, PostFoodDraftInfoSerializer
-from puclic import Authtication
+from puclic import Authtication, check_undefined
 
 
 class AnswerDraftView(APIView):
     """回答草稿视图"""
     authentication_classes = [Authtication, ]
 
+    @check_undefined
     def get(self,request):
         """获取草稿详情"""
         draft_id = request.GET.get('draft')
@@ -48,6 +49,7 @@ class AnswerDraftView(APIView):
         else:
             return Response({'status': 'fail', 'error': ser.errors})
 
+    @check_undefined
     def delete(self,request):
         """删除草稿"""
         answer_draft_id = request.GET.get('draft')
@@ -71,6 +73,7 @@ class MyDraftView(APIView):
     """我的草稿视图"""
     authentication_classes = [Authtication, ]
 
+    @check_undefined
     def get(self,request):
         """获取我的草稿"""
         user_id = request.user.pk
@@ -101,6 +104,7 @@ class FoodDraftView(APIView):
     """美食草稿视图"""
     authentication_classes = [Authtication, ]
 
+    @check_undefined
     def get(self,request):
         """获取草稿详情"""
         draft_id = request.GET.get('draft')
@@ -137,6 +141,7 @@ class FoodDraftView(APIView):
         else:
             return Response({'status': 'fail', 'error': ser.errors})
 
+    @check_undefined
     def delete(self, request):
         """删除草稿"""
         food_draft_id = request.GET.get('draft')

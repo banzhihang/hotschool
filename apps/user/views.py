@@ -4,10 +4,10 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_jwt.settings import api_settings
 
-from puclic import Authtication, get_ordering
+from puclic import Authtication, get_ordering, LooseAuthtication, check_undefined
 from question.paginations import CollectCommentByTimePagination
 from question.serializers import RevertInfoSerializer
-from .extra import OpenIdAndImage, modify_headimage_name,uuid_string,create_user_dynamic
+from .extra import OpenIdAndImage,uuid_string,create_user_dynamic
 from .paginations import UserAttentionPagination, UserCreateByTimePagination, UserCollectPagination, \
     UserDynamicByTimePagination, UserRecentPagination
 from .serializers import *
@@ -27,31 +27,30 @@ class LoginView(APIView):
 
         # 获得用户openid和头像，若用户存在数据库，则不更新用户昵称和头像(用户可能存在自定义昵称头像)。
         #  若不存在，就用获得的昵称和头像创建用户
-        openid, image = OpenIdAndImage(jscode, head_portrait_url).get_openid_image()
+        openid= OpenIdAndImage(jscode).get_openid()
         try:
             user = User.objects.get(we_chat_openid=openid)
         except User.DoesNotExist:
             # 使用随机字符串当作用户名，openid当作密码
             user = User.objects.create(nick_name=nick_name, username=uuid_string(),
-                                       head_portrait=image, we_chat_openid=openid, password=openid)
+                                       head_portrait=head_portrait_url, we_chat_openid=openid, password=openid)
             user.save()
-        # 拼接头像url
-        head_portrait = domain_name+user.head_portrait.url
-        # 用户头像
-        nick_name = user.nick_name
+
+        head_portrait,nick_name,user_id= user.head_portrait,user.nick_name,user.pk
         # 生成token
         jwt_payload_handler = api_settings.JWT_PAYLOAD_HANDLER
         jwt_encode_handler = api_settings.JWT_ENCODE_HANDLER
         payload = jwt_payload_handler(user)
         token = jwt_encode_handler(payload)
 
-        return Response({'token': token, "openid": openid,'head_portrait':head_portrait,'nick_name':nick_name})
+        return Response({'id':user_id,'token': token, "openid": openid,'head_portrait':head_portrait,'nick_name':nick_name})
 
 
 class UserInfoView(APIView):
     """用户信息"""
     authentication_classes = [Authtication, ]
 
+    @check_undefined
     def get(self, request):
         """
         获取用户信息
@@ -64,8 +63,6 @@ class UserInfoView(APIView):
 
     def put(self, request):
         """修改用户信息"""
-        # 修改图片名字
-        request = modify_headimage_name(request)
         ser = UpdateUserInfoSerializer(data=request.data, instance=request.user)
         if ser.is_valid():
             ser.save()
@@ -78,6 +75,7 @@ class RecentBrowseView(APIView):
     """用户的最近浏览记录"""
     authentication_classes = [Authtication, ]
 
+    @check_undefined
     def get(self, request):
         """获取用户的浏览记录"""
         # 去redis获得用户浏览的回答的answer.id(已经根据浏览时间排序)组成的列表,并根据该顺序去数据库批量查询，分页后返回前端
@@ -92,8 +90,7 @@ class RecentBrowseView(APIView):
 
         page = UserRecentPagination()
         page_roles = page.paginate_queryset(queryset=recent_browse_answers, request=request, view=self)
-        answers = UserRecentBrowseAnswerSerializer(instance=page_roles,
-                                                   many=True, context={'request': request})
+        answers = UserRecentBrowseAnswerSerializer(instance=page_roles,many=True, context={'request': request})
 
         return page.get_paginated_response(answers.data)
 
@@ -115,6 +112,7 @@ class MyPublishView(APIView):
     """用户的问题,回答,评论,美食"""
     authentication_classes = [Authtication, ]
 
+    @check_undefined
     def get(self, request):
         """
         获取用户的回答问题美食,type=0为回答，1为问题,2为评论,3为美食
@@ -134,7 +132,7 @@ class MyPublishView(APIView):
         elif type == 1:
             question_set = Question.objects.filter(user=request.user.pk)
             page_roles = page.paginate_queryset(queryset=question_set, request=request, view=self)
-            questions = UserQuestionCollectSerializer(instance=page_roles, many=True, context={'request': request})
+            questions = UserQuestionPublishSerializer(instance=page_roles, many=True, context={'request': request})
             return page.get_paginated_response(questions.data)
 
         elif type == 2:
@@ -157,6 +155,7 @@ class MyCollectView(APIView):
     """用户的收藏"""
     authentication_classes = [Authtication, ]
 
+    @check_undefined
     def get(self, request):
         """
         获取用户的收藏,type为0为问题，为1则为回答,2为美食
@@ -167,7 +166,7 @@ class MyCollectView(APIView):
             return Response({'error': '发生错误'})
         else:
             if type == 0:
-                questions = request.user.question_collect.all()
+                questions =  UserCollectQuestion.objects.select_related('question').filter(user_id=request.user.pk)
                 # 分页
                 page = UserCreateByTimePagination()
                 page_roles = page.paginate_queryset(queryset=questions, request=request, view=self)
@@ -190,31 +189,15 @@ class MyCollectView(APIView):
                 page_roles = page.paginate_queryset(queryset=foods_set, request=request, view=self)
                 foods = UserFoodCollectSerializer(instance=page_roles, many=True)
                 return page.get_paginated_response(foods.data)
-
             else:
                 return Response({'error': '发生错误'})
 
 
-class MyAttentionView(APIView):
-    """
-    用户关注的人
-    """
-    authentication_classes = [Authtication, ]
-
-    def get(self, request):
-        # 获取用户关注的人
-        coon = redis.Redis(connection_pool=POOL)
-        attention_id_list = coon.smembers('attention:' + str(request.user.pk))
-        attention_set = User.objects.filter(pk__in=attention_id_list)
-        page = UserAttentionPagination()
-        page_roles = page.paginate_queryset(queryset=attention_set, request=request, view=self)
-        attentions = UserAttentionSerializer(instance=page_roles, many=True, context={'request': request})
-        return page.get_paginated_response(attentions.data)
-
-
 class UserInfoShowView(APIView):
-    """用户详情"""
+    """用户详情(用户信息展示)"""
+    authentication_classes = [LooseAuthtication, ]
 
+    @check_undefined
     def get(self, request, user_id):
         """获取用户创作数据"""
         try:
@@ -229,6 +212,7 @@ class UserInfoShowView(APIView):
 class UserDynamicView(APIView):
     """用户动态"""
 
+    @check_undefined
     def get(self, request, user_id):
         """获取用户动态"""
         create_user_dynamic(user_id)
@@ -245,6 +229,9 @@ class UserDynamicView(APIView):
 
 class UserAttention(APIView):
     """获取用户的关注信息"""
+    authentication_classes = [LooseAuthtication, ]
+
+    @check_undefined
     def get(self,request,user_id):
         try:
             type = int(request.GET.get('type',0))
@@ -272,6 +259,7 @@ class UserCreatorDataView(APIView):
     """用户昨天的创作者数据"""
     authentication_classes = [Authtication, ]
 
+    @check_undefined
     def get(self,request):
         """获得用户昨日的创作者数据"""
         user_id = request.user.pk
@@ -296,6 +284,7 @@ class CollectCommentInfoView(APIView):
     """我的发布中评论详情"""
     authentication_classes = [Authtication, ]
 
+    @check_undefined
     def get(self,request):
         """获得评论详情"""
         comment_id = request.GET.get('comment')
@@ -320,7 +309,13 @@ class CollectCommentInfoView(APIView):
             return Response({})
 
 
-
+class DeleteTestView(APIView):
+    def get(self,request):
+        old_picture_url = 'https://hotschool.ltd/IMG_20190503_193130.jpg'
+        a, b = QiNiuFileManage(old_picture_url).delete()
+        print(a)
+        print(b)
+        return Response('a')
 
 
 

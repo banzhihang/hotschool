@@ -1,9 +1,7 @@
 import time
 import datetime
-import re
 
 import redis
-from bs4 import BeautifulSoup
 
 from HotSchool.settings import POOL
 from question.models import Question, Answer
@@ -120,9 +118,9 @@ def get_hot_question_image(question_model):
     返回值:图片url
     """
     coon = redis.Redis(connection_pool=POOL)
-    # 最多检查前50个回答,若前50个回答都没有配图,就不再检查
+    # 最多检查前50个回答,若前5*10个回答都没有配图,就不再检查
     for i in range(5):
-        answer_id_list = coon.zrevrange('answer:score:' + str(question_model.pk), start=i * 10, end=(i + 1) * 10)
+        answer_id_list = coon.zrevrange('answer:score:' + str(question_model.pk), start=i*10, end=(i + 1) * 10)
         # 若redis返回的回答列表为空,就说明没有回答了,就返回空
         if answer_id_list:
             answer_set = Answer.objects.filter(id__in=answer_id_list).values_list('first_image')
@@ -135,7 +133,6 @@ def get_hot_question_image(question_model):
         # 若回答id列表小于10,说明此次redis返回的回答id已到达最末尾几个回答,直接返回
         if len(answer_id_list) <10:
             return None
-
 
 
 

@@ -1,7 +1,7 @@
 from __future__ import absolute_import, unicode_literals
 
 import os
-from datetime import timedelta
+
 
 from celery import Celery
 
@@ -22,12 +22,13 @@ app.config_from_object('django.conf:settings', namespace='CELERY')
 # Load task modules from all registered Django app configs.
 app.autodiscover_tasks()
 
-# app.conf.update(
-#   CELERYBEAT_SCHEDULE = {
-#     'send-report': {
-#       'task': 'deploy.tasks.report',
-#       'schedule': crontab(hour=4, minute=30, day_of_week=1),
-#     }
-#   }
-# )
+# 定时任务
+app.conf.beat_schedule = {
+    'clear_question': {
+        'task': 'question.tasks.check_hot_question_expire_time',
+        'schedule': crontab(minute=20,hour=0),
+    }
+}
 
+if __name__ == '__main__':
+    app.start()

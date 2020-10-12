@@ -13,9 +13,7 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 import os
 import sys
 from datetime import timedelta, datetime
-
 import django_celery_results
-# Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import redis
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -36,7 +34,7 @@ QINIU_BUCKET_NAME = 'hotschool'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 # 域名
-domain_name = 'http://127.0.0.1:8000'
+domain_name = 'http://10.129.8.26:8000'
 
 ALLOWED_HOSTS = ['*']
 
@@ -54,28 +52,32 @@ CHANNEL_LAYERS = {
     },
 }
 
+CORS_ORIGIN_ALLOW_ALL = True
+CORS_ALLOW_CREDENTIALS = True
+
 # jwt过期时间
 JWT_AUTH = {
     'JWT_EXPIRATION_DELTA': timedelta(days=1000)
 }
 
 # celery配置·
-CELERY_IGNORE_RESULT = True # 忽略执行结果
-CELERY_TIMEZONE = 'Asia/Shanghai' # 时区
-CELERY_BROKER_URL = 'amqp://guest:guest@localhost:5672//' # 消息队列
-CELERY_TASK_SERIALIZER = 'pickle' # 序列化的数据类型
-CELERY_ACCEPT_CONTENT = ['json','pickle'] # 接受的数据类型
-
+CELERY_IGNORE_RESULT = True  # 忽略执行结果
+CELERY_TIMEZONE = 'Asia/Shanghai'  # 时区
+CELERY_BROKER_URL = 'amqp://guest:guest@localhost:5672//'  # 消息队列
+CELERY_TASK_SERIALIZER = 'pickle'  # 序列化的数据类型
+CELERY_ACCEPT_CONTENT = ['json', 'pickle']  # 接受的数据类型
 
 # Application definition
 INSTALLED_APPS = [
     'channels',
+    'simpleui',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'corsheaders',
     'haystack',
     'rest_framework',
     'django_celery_beat',
@@ -94,8 +96,8 @@ AUTH_USER_MODEL = 'user.User'
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
-    #'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
@@ -116,6 +118,10 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
             ],
+            'libraries': {
+                'simpleui': 'simpleui.templatetags.simpletags'
+            },
+
         },
     },
 ]
@@ -164,7 +170,6 @@ REST_FRAMEWORK_EXTENSIONS = {
     'DEFAULT_USE_CACHE': 'default',
 }
 
-
 # Password validation
 # https://docs.djangoproject.com/en/2.2/ref/settings/#auth-password-validators
 
@@ -186,19 +191,23 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/2.2/topics/i18n/
 
-POOL = redis.ConnectionPool(host='127.0.0.1', port=6379,db=1,decode_responses=True)
+POOL = redis.ConnectionPool(host='127.0.0.1', port=6379, db=1, decode_responses=True)
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'zh-hans'
 TIME_ZONE = 'Asia/Shanghai'
-
 USE_I18N = True
-
 USE_L10N = True
+USE_TZ = False
 
-USE_TZ = True
+RECOMMENT_NUMBER = 5
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
 
 STATIC_URL = '/static/'
 MEDIA_URL = '/media/'
+
+ANONYMITY_USER_HEAD_IMAGE = 'https://hotschool.ltd/u%3D2632989821%2C2608635516%26fm%3D26%26gp%3D0.jpg'
+
+STATIC_ROOT = os.path.join(BASE_DIR, "static")
+SIMPLEUI_DEFAULT_THEME = 'admin.lte.css'

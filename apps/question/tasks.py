@@ -1,14 +1,13 @@
+import base64
 import re
 import time
 from datetime import datetime,timedelta
-
 import redis
 from bs4 import BeautifulSoup
-from celery import shared_task
-from celery.schedules import crontab
-from celery.task import periodic_task
+
 from django.db.models import F
 
+from HotSchool.celery import app
 from HotSchool.settings import domain_name, POOL
 from communicate.extra import notification_user
 from food.models import Discuss, FoodComment
@@ -16,8 +15,8 @@ from question.algorithms import calculate_question_hot_score
 from question.models import Answer, Comment, Question
 
 
-@shared_task
-def push_to_user(from_user, to_user, type, instance=None):
+@app.task
+def push_to_user(from_user, to_user, type, instance=None,content=None):
     """
     通知用户的异步任务
     from_user:引发推送的用户(一个对象)
@@ -79,8 +78,13 @@ def push_to_user(from_user, to_user, type, instance=None):
         data = {'from_user': -1, 'message': push_data, 'time': now_time, 'type': 5}
         notification_user(to_user, data)
 
+    elif type == 6:
+        # 系统消息
+        data = {'from_user': -1, 'message': content, 'time': now_time, 'type': 6}
+        notification_user(to_user, data)
 
-@shared_task
+
+@app.task
 def calculate_question_and_sync(question_id):
     """
     计算问题的热度值,并将相关数据同步至数据库
@@ -123,7 +127,7 @@ def calculate_question_and_sync(question_id):
     coon.delete('qd:'+str(question_id)+':'+yesterday)
 
 
-@periodic_task(run_every=crontab(minute=20,hour=0)) # 每天凌晨0点20执行
+@app.task # 每天凌晨0点20执行
 def check_hot_question_expire_time():
     """定时清理已达到过期时间的上过热榜的问题"""
     coon = redis.Redis(connection_pool=POOL)
@@ -133,7 +137,7 @@ def check_hot_question_expire_time():
     coon.zremrangebyscore('hot:record',min=0,max=now_timestamp)
 
 
-@shared_task
+@app.task
 def calculate_school_hot_rank(school_id):
     """
     计算出各学校的热榜
@@ -147,7 +151,7 @@ def calculate_school_hot_rank(school_id):
     # 热榜问题前15
     hot_list = coon.zrevrange('hot:' + str(school_id) + ':' + today, start=0, end=14)
     dict = {}
-    # 构造字典,键为前二十问题id,值为2天之后的时间戳
+    # 构造字典,键为前二十问题id,值为2天之后的时间戳(2天后才能再次上榜)
     for i in hot_list:
         dict[i] = expire_time
     # 将这些问题添加到热榜记录
@@ -160,7 +164,7 @@ def calculate_school_hot_rank(school_id):
         coon.zremrangebyrank('hot:' + str(school_id) + ':' + today, min=0, max=zset_number - 15 - 1)
 
 
-@shared_task
+@app.task
 def get_answer_abstract_and_first_image(answer_id):
     """
     获得回答的摘要和第一张图片,并添加到数据库
@@ -173,7 +177,7 @@ def get_answer_abstract_and_first_image(answer_id):
     except Answer.DoesNotExist:
         pass
     else:
-        html = answer.content
+        html = base64.decode(answer.content)
         pattern = re.compile("img src='(.*?)'")
         # 获得第一张图片
         img_url = pattern.search(html)
@@ -182,9 +186,9 @@ def get_answer_abstract_and_first_image(answer_id):
         if img_url:
             # 保存至数据库
             answer.first_image = img_url[1]
-            answer.abstract = clean_text[0:40]
+            answer.abstract = clean_text[0:38]+'...'
             answer.save()
         else:
-            answer.abstract = clean_text[0:40]
+            answer.abstract = clean_text[0:38]+'...'
             answer.save()
 

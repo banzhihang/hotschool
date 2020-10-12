@@ -1,6 +1,5 @@
 from drf_haystack.filters import HaystackHighlightFilter
 from drf_haystack.viewsets import HaystackViewSet
-from rest_framework.response import Response
 
 from food.models import Food, Flavour
 from puclic import LooseAuthtication

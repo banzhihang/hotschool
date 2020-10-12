@@ -9,11 +9,11 @@ class FoodByScorePagination(CursorPagination):
     美食排行分页器(score排序)
     """
     # 每页默认数量
-    page_size = 20
+    page_size = 10
     # 排序规则
     ordering = '-score'
     # 每页最大显示数量
-    max_page_size = 30
+    max_page_size = 20
 
     # 自定义返回格式
     def get_paginated_response(self, data):
@@ -28,11 +28,11 @@ class FoodByTimePagination(CursorPagination):
     美食排行分页器(time排序)
     """
     # 每页默认数量
-    page_size = 20
+    page_size = 10
     # 排序规则
     ordering = '-add_time'
     # 每页最大显示数量
-    max_page_size = 30
+    max_page_size = 20
 
     # 自定义返回格式
     def get_paginated_response(self, data):

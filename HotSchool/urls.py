@@ -51,5 +51,5 @@ urlpatterns = [
     # 推荐
     path('recommend',RecommendView.as_view()),
     # 草稿箱
-    path('draft/',include('draft.urls'),name='draft')
+    path('draft/',include('draft.urls'),name='draft'),
 ]

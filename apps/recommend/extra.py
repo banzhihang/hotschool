@@ -42,7 +42,7 @@ def mix_answer_and_question(answer_data,question_data):
             for i in question_data:
                 # 在0到answer_len之间随机选择一个位置将问题数据插入回答数据
                 insert_location = random.choice(range(0,ans_len))
-                answer_data.insert(insert_location[0],i)
+                answer_data.insert(insert_location,i)
             return answer_data
         else:
             for i in answer_data:

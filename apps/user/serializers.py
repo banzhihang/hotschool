@@ -1,13 +1,14 @@
-import os
 import time
 
 import redis
+from django.contrib.auth.models import AnonymousUser
 from rest_framework import serializers
 
-from HotSchool.settings import domain_name, POOL
+from HotSchool.settings import domain_name, POOL, ANONYMITY_USER_HEAD_IMAGE
 from food.models import Food
+from puclic import verify_serializers
 from question.models import *
-from HotSchool import settings
+from upload.extra import QiNiuFileManage
 from user.models import *
 
 
@@ -24,50 +25,23 @@ class UserInfoSerializer(serializers.ModelSerializer):
 
 class UpdateUserInfoSerializer(serializers.ModelSerializer):
     """
-    用户提交信息序列化器
-    必须字段:无,选要字段:nick_name,phone,desc,school,interest,interest(例子:1,2),
+    修改用户信息序列化器
+    必须字段:无,选要字段:nick_namedesc,school
     """
-    nick_name = serializers.CharField(min_length=2, max_length=10, required=False, error_messages={
-        'min_length': '昵称最低2个字符',
+    nick_name = serializers.CharField(min_length=1, max_length=10, required=False, error_messages={
+        'min_length': '昵称最低1个字符',
         'max_length': '昵称最大10字符'
     })
     desc = serializers.CharField(min_length=5, max_length=30, required=False, error_messages={
         'min_length': '个人描述最低5个字符',
         'max_length': '个人描述最大30字符'})
-    school = serializers.CharField(required=False)
 
-
-    def validate(self, attrs):
-        school = attrs.get('school')
-        # 验证学校是否存在
-        if school:
-            try:
-                school = School.objects.get(name=school)
-            except school.DoesNotExist:
-                raise serializers.ValidationError('学校不存在')
-            else:
-                attrs['school_id'] = int(school.id)
-                attrs.pop('school')
-
-        return attrs
 
     def update(self, instance, validated_data):
-        new_head_portrait = validated_data.get('head_portrait',None)
-        if not new_head_portrait:
-            return User.objects.filter(id=instance.id).update(**validated_data)
-        else:
-            image_url = instance.head_portrait.name
-            # 若旧图片不是默认图片，则先移除旧图片再更新图片
-            if image_url != 'headimage\default.png':
-                # 更新图片之前删除旧照片
-                path = settings.MEDIA_ROOT + '\\' + image_url
-                os.remove(path)
-
-            instance.head_portrait = new_head_portrait
-            # update方法无法正确更新图片的路径，必须使用save方法
-            instance.save()
-            validated_data.pop('head_portrait')
-            return User.objects.filter(id=instance.id).update(**validated_data)
+        # 更新头像之前先删除存储在七牛云上的旧图片
+        old_picture_url = instance.head_portrait
+        _,_ = QiNiuFileManage(old_picture_url).delete()
+        return User.objects.filter(id=instance.id).update(**validated_data)
 
     class Meta:
         model = User
@@ -81,19 +55,42 @@ class UserRecentBrowseAnswerSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Answer
-        fields = ['id', 'user_nick_name', 'approval_number',
-                  'comment_number','abstract','question_title']
+        fields = ['id', 'user_nick_name', 'approval_number','comment_number','abstract','question_title']
 
 
 class UserAttentionSerializer(serializers.ModelSerializer):
     """用户关注序列化器"""
+    is_attention = serializers.SerializerMethodField()
+
+    @verify_serializers(type=0)
+    def get_is_attention(self,obj,user):
+        coon = redis.Redis(connection_pool=POOL)
+        is_attention = coon.sismember('attention:' + str(user.pk), obj.pk)
+        if is_attention:
+            return 1
+        else:
+            return 0
+
     class Meta:
         model = User
-        fields = ['id','nick_name','head_portrait','desc']
+        fields = ['id','nick_name','head_portrait','desc','is_attention']
 
 
 class UserQuestionCollectSerializer(serializers.ModelSerializer):
     """用户收藏的问题序列化器"""
+    id = serializers.IntegerField(source='question.id')
+    title = serializers.CharField(source='question.title')
+    answer_number = serializers.IntegerField(source='question.answer_number')
+    attention_number = serializers.IntegerField(source='question.attention_number')
+
+    class Meta:
+        model = UserCollectQuestion
+        fields = ['id', 'title','answer_number','attention_number']
+
+
+class UserQuestionPublishSerializer(serializers.ModelSerializer):
+    """用户发布的问题序列化器"""
+
     class Meta:
         model = Question
         fields = ['id', 'title','answer_number','attention_number']
@@ -107,10 +104,9 @@ class UserAnswerCollectSerializer(serializers.ModelSerializer):
 
     def get_user_head_portrait(self,answer):
         if answer.is_anonymity == 1:
-            path = domain_name + '/media/headimage/anonymity.jpg'
-            return path
+            return ANONYMITY_USER_HEAD_IMAGE
         else:
-            return domain_name + answer.user.head_portrait.url
+            return answer.user.head_portrait
 
     def get_user_nick_name(self, answer):
         if answer.is_anonymity == 1:
@@ -131,7 +127,7 @@ class UserRevertInfoSerializer(serializers.ModelSerializer):
     comment_content = serializers.CharField(source='comment.content')
     question_title = serializers.CharField(source='comment.question.title')
     user_nick_name = serializers.CharField(source='user.nick_name')
-    user_head_portrait = serializers.ImageField(source='user.head_portrait')
+    user_head_portrait = serializers.URLField(source='user.head_portrait')
     target_user_nick_name = serializers.CharField(source='target_user.nick_name')
     target_user = serializers.IntegerField(source='target_user.pk')
 
@@ -156,58 +152,77 @@ class UserCommentInfoSerializer(serializers.ModelSerializer):
 class UserFoodInfoSerializer(serializers.ModelSerializer):
     """用户的美食信息序列化器"""
     score = serializers.SerializerMethodField()
+    desc = serializers.SerializerMethodField()
 
     def get_score(self,obj):
         """将分数值舍入到小数点一位来显示"""
-        if obj.vote_number <20:
+        if obj.vote_number <10:
             return None
         else:
             return round(obj.score,1)
 
+    def get_desc(self,obj):
+        """获得描述,字数大于13就截断同时添加..."""
+        desc = obj.desc
+        if len(desc)<13:
+            return desc
+        else:
+            return desc[0:13]+'...'
+
     class Meta:
         model = Food
-        fields = ['id','name','image_first','score']
+        fields = ['id','name','image_first','score','desc']
 
 
 class UserFoodCollectSerializer(serializers.ModelSerializer):
     """用户美食收藏序列化器"""
     id = serializers.IntegerField(source='food.id')
     name = serializers.CharField(source='food.name')
+    desc = serializers.SerializerMethodField()
     image_first = serializers.CharField(source='food.image_first')
     score = serializers.SerializerMethodField()
 
     def get_score(self,obj):
         """将分数值舍入到小数点一位来显示"""
-        if obj.food.vote_number <20:
+        if obj.food.vote_number <10:
             return None
         else:
             return round(obj.food.score,1)
 
+    def get_desc(self,obj):
+        """获得描述,字数大于13就截断同时添加..."""
+        desc = obj.food.desc
+        if len(desc)<13:
+            return desc
+        else:
+            return desc[0:13]+'...'
+
     class Meta:
         model = UserCollectFood
-        fields = ['id','name','image_first','score']
+        fields = ['id','name','image_first','score','desc']
 
 
 class UserAnswerInfoSerializer(serializers.ModelSerializer):
     """用户回答信息序列化"""
     user_nick_name = serializers.CharField(source='user.nick_name')
     question_title = serializers.CharField(source='question.title')
-    user_head_portrait = serializers.ImageField(source='user.head_portrait')
+    user_head_portrait = serializers.URLField(source='user.head_portrait')
 
 
     class Meta:
         model = Answer
-        fields = ['id','user_nick_name','approval_number',
-                  'comment_number','abstract','user_head_portrait','question_title']
+        fields = ['id','user_nick_name','approval_number','comment_number','abstract','user_head_portrait','question_title']
 
 
 class UserInfoShowSerializer(serializers.ModelSerializer):
     """用户信息展示序列化器"""
     nick_name = serializers.CharField(source='user.nick_name')
     desc = serializers.CharField(source='user.desc',default='')
-    head_portrait = serializers.ImageField(source='user.head_portrait')
+    head_portrait = serializers.URLField(source='user.head_portrait')
+    school_name = serializers.CharField(source='user.school.name')
     collect_user_number = serializers.SerializerMethodField()
     user_be_collect_number = serializers.SerializerMethodField()
+    is_attention = serializers.SerializerMethodField()
 
     def get_collect_user_number(self,obj):
         # 从redis获取关注用户的人的数量
@@ -222,10 +237,19 @@ class UserInfoShowSerializer(serializers.ModelSerializer):
         number = coon.scard('attention:' + str(obj.user_id))
         return number
 
+    @verify_serializers(type=0)
+    def get_is_attention(self,obj,user):
+        coon = redis.Redis(connection_pool=POOL)
+        is_attention = coon.sismember('attention:'+str(user.pk),obj.pk)
+        if is_attention:
+            return 1
+        else:
+            return 0
+
     class Meta:
         model = UserData
-        fields = ['user','nick_name','desc','head_portrait','collect_user_number','user_be_collect_number',
-                  'approval_number','like_number','collect_number','read_number']
+        fields = ['user','nick_name','desc','school_name','head_portrait','collect_user_number','user_be_collect_number',
+                  'approval_number','like_number','collect_number','read_number','is_attention']
 
 
 class UserDynamicSerializer(serializers.ModelSerializer):
@@ -233,13 +257,15 @@ class UserDynamicSerializer(serializers.ModelSerializer):
     type = serializers.IntegerField()
     add_time = serializers.SerializerMethodField()
     content = serializers.SerializerMethodField()
+    user_head_portrait = serializers.URLField(source='user.head_portrait')
+    user_nick_name = serializers.CharField(source='user.nick_name')
 
     def get_content(self,obj):
         # 若type在1，2，3里面，则序列化回答，否则序列化问题
         if obj.type in [0,1,2]:
             content = UserDynamicAnswerSerializer(instance=obj.answer)
         else:
-            content = UserQuestionCollectSerializer(instance=obj.question)
+            content = UserQuestionPublishSerializer(instance=obj.question)
         return content.data
 
     def get_add_time(self,obj):
@@ -248,7 +274,7 @@ class UserDynamicSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = UserDynamic
-        fields = ['type','add_time','content',]
+        fields = ['type','add_time','user_head_portrait','content','user_nick_name']
 
 
 class UserDynamicAnswerSerializer(serializers.ModelSerializer):
@@ -258,13 +284,13 @@ class UserDynamicAnswerSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Answer
-        fields = ['id','question_title','user_nick_name','approval_number','comment_number','abstract']
+        fields = ['id','question_title','user_nick_name','approval_number','comment_number','abstract','first_image']
 
 
 class CollectCommentInfoSerializer(serializers.ModelSerializer):
     """我的发布中评论详情序列化器"""
     nick_name = serializers.CharField(source='user.nick_name')
-    head_portrait = serializers.ImageField(source='user.head_portrait')
+    head_portrait = serializers.URLField(source='user.head_portrait')
     question = serializers.IntegerField(source='answer.question.pk')
     question_title = serializers.CharField(source='answer.question.title')
     answer = serializers.IntegerField(source='answer.pk')

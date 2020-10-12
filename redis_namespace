@@ -1,0 +1,125 @@
+redis命名(特别优化 ud  qd, ad)
+
+
+user
+1.recentbrowse:(user_id)  用户浏览记录
+类型:zset
+value:answer_id
+score:时间戳
+length:1000
+
+2.user:connect:(user_id) 用户的通道名
+类型:hash
+key:用户id
+value:通道名
+
+3.message:(user_id) 用户未读消息
+类型:zset
+value:未读消息字典对象的json字符串
+score：时间戳
+
+
+4.attention:(user_id) 用户关注的人
+类型:set
+value:用户关注的人的id
+
+5.collect:(user_id) 用户收藏的回答
+类型:set
+value:用户收藏的回答的id
+
+6.beattention:(user_id) 关注该用户的人
+类型:set
+vaule:关注该用户的人的id
+
+7. ud:(time):(user_id) 该用户当天的创作数据
+类型:hash  (ud   user_data)
+value-
+read:当天阅读数,approval:当天获赞数
+like:当天喜欢数,collect:当天被收藏数,comment:当天被评论数,attention( 当日新增关注)
+过期时间：两天
+
+
+8. approval:(user_id) 用户赞同的回答和评论回复id
+类型:set
+value-
+例子：a:1:0表示不喜欢回答1   a:2:1表示喜欢回答2
+c:1 表示赞同了评论1   r:1表示赞同了回复1
+ s:1表示赞过该短评 fc:1表示赞同过该讨论评论 d:1表示赞同该讨论 fr:1表示赞同该讨论回复
+
+9.dynamic:(user_id)
+类型:zset
+value:动态内容json之后的字符串 {‘answer’:(answer_id), ’question’:(question_id), ’type’:(type), ’user’:(user_id)}
+定时同步到数据库或者主动同步之后删除
+
+10.recom:(user_Id)
+用户的推荐问题记录id集和
+类型:zset
+value:question_id
+score:下一次可推荐时间
+
+
+
+
+
+question
+1.answer:score:(question_id) 问题的回答排名(根据score排名)
+类型:zset
+value:answer_id
+score:answer的威尔逊得分
+
+2.answer:time:(question_id) 问题的回答排名(根据time排名)
+类型:zset
+value:answer_id
+score:answer 的添加时间(时间戳)
+
+3.hot:(school_id):(time 例如20200720) 热榜问题排名
+类型zset
+value:question_id
+score:question 的热度值
+过期时间:第二天半夜3点
+
+4.hot:record 上过热榜的问题的id
+类型:zset
+value:question_id
+score:question下次可以上榜的时间的时间戳
+
+5.qd:(question_id):(time 例如20200710)  问题time那天的各种操作数据
+类型:hash
+key :scan(该问题的浏览增量)  answer(该问题的回答增量) approval(赞同(喜欢)包括反对增量)
+attention(关注增量) comment(评论增量) ,collect(该问题的回答的收藏增量),school(问题所属学校id,方便快速计算热度值)
+value:初始值都为0
+
+
+celery -A Clock worker -l info -P eventlet
+flower --port=5555
+celery beat --loglevel=info
+
+
+
+
+answer
+1.ad:(answer_id)  answer数据
+类型：hash
+value
+过期时间:1 小时
+key approval(获赞数)  vote(投票总数)  collect(收藏数)  question(该回答对应的问题id) user(该回答对应的作者id)
+
+2.al:(answer_id)   al为answer:like的缩写
+类型：bitmap  喜欢该回答的人
+
+
+Food
+1.food
+类型:set
+value :需要更新得分的食物id
+每十分钟更新一次
+
+
+recommend
+1.question:recommend  所有问题的id集和
+类型:set
+value:所有问题id
+
+2.recommend:(school_id)
+类型:set
+value:各个学校的问题id

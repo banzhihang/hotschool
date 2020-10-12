@@ -16,11 +16,12 @@ urlpatterns = [
     # 用户收藏
     path('collect', MyCollectView.as_view()),
     # 我的关注
-    path('myattention', MyAttentionView.as_view()),
+    #path('myattention', MyAttentionView.as_view()),
     # 用户关注和被关注
     path('attention/<int:user_id>',UserAttention.as_view()),
     # 用户昨日创作者数据
     path('create',UserCreatorDataView.as_view()),
     # 评论详情
-    path('comment',CollectCommentInfoView.as_view())
+    path('comment',CollectCommentInfoView.as_view()),
+    path('test',DeleteTestView.as_view())
 ]

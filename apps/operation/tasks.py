@@ -1,13 +1,13 @@
 import redis
 
-from celery import shared_task
 
+from HotSchool.celery import app
 from HotSchool.settings import POOL
 from question.algorithms import wilson_score_answer
 from question.models import Answer
 
 
-@shared_task
+@app.task
 def calculate_answer_score(question_id,answer_id):
     """
     更新回答的威尔逊得分,同时将数据刷回数据库(15分钟后)

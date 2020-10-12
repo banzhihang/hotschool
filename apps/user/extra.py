@@ -36,40 +36,27 @@ def modify_headimage_name(request):
 
 
 class OpenIdAndImage:
-    """获取openid和用户微信头像"""
+    """获取openid"""
 
-    def __init__(self, code, image_url):
+    def __init__(self, code):
         self.openid_url = 'https://api.weixin.qq.com/sns/jscode2session'
-        # 头像地址
-        self.img_url = image_url
         self.app_id = 'wx35df04e950c9cad8'
         self.app_secret = '7107762d645e15f6f49bdfb0e4180aa4'
         self.code = code
 
-    def get_openid_image(self):
+    def get_openid(self):
         openid_url = self.openid_url + "?appid=" + self.app_id + "&secret=" + self.app_secret + \
                      "&js_code=" + self.code + "&grant_type=authorization_code"
         res1 = requests.get(openid_url)
-        res2 = requests.get(self.img_url)
         try:
             openid = res1.json()['openid']
-            # 图像内容为二进制格式，要转换成django InMemoryUploadedFile类型
-            res3 = res2.content
-            image = BytesIO(res3)
-            # 改变图片的名字，用正则表达式匹配图像type,使用随机字符串代替原名字
-            image_type = res2.headers.get("Content-Type")
-            pattern = re.compile('[^/]+$')
-            # 获得图像格式
-            tail = re.findall(pattern, image_type)
-            image = InMemoryUploadedFile(image, None, uuid_string()
-                                         + '.' + tail[0], None, len(res3), None, None)
         except:
             return Response({"msg": "登录失败"})
         else:
-            return openid, image
+            return openid
 
 
-def create_user_dynamic(user_id, ):
+def create_user_dynamic(user_id):
     """
     :param user: 动态所属用户
     :param answer:动态所属回答

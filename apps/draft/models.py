@@ -10,6 +10,9 @@ class AnswerDraft(models.Model):
     add_time = models.DateTimeField(auto_now_add=True, verbose_name='添加时间')
     modify_time = models.DateTimeField(auto_now = True, verbose_name='修改时间',db_index=True)
 
+    def __str__(self):
+        return self.user.nick_name
+
     class Meta:
         verbose_name = '回答草稿'
         verbose_name_plural = verbose_name
@@ -33,6 +36,9 @@ class FoodDraft(models.Model):
     add_time = models.DateTimeField(verbose_name='添加时间', auto_now_add=True)
     modify_time = models.DateTimeField(auto_now=True, verbose_name='修改时间',db_index=True)
     school = models.ForeignKey('user.School', on_delete=models.CASCADE, verbose_name='所属学校',null=True)
+
+    def __str__(self):
+        return self.user.nick_name
 
     class Meta:
         verbose_name = '美食草稿'

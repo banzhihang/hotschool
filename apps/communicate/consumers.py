@@ -30,7 +30,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                             'data':data,
                         }
                     )
-                coon.delete('message:unread:'+str(user.id))
+                coon.delete('message:'+str(user.id))
 
     async def disconnect(self, close_code):
         # 断开连接，同时从redis中删除该用户的channel_name
@@ -54,7 +54,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         to_user_channel_name = coon.hget('user:connect',str(to_user))
         if to_user_channel_name :
             await self.channel_layer.send(
-                to_user_channel_name.decode(),
+                to_user_channel_name,
                 {
                     'type':'chat_message',
                     'data':data,

@@ -57,7 +57,6 @@ class FoodSearchSerializer(HaystackSerializer):
 
 class UserSerializer(serializers.ModelSerializer):
     """用户信息序列化器"""
-    head_portrait = serializers.SerializerMethodField()
     is_attention = serializers.SerializerMethodField()
 
     # 判断用户是否关注目标用户
@@ -73,12 +72,9 @@ class UserSerializer(serializers.ModelSerializer):
         else:
             return 0
 
-    def get_head_portrait(self,obj):
-            return domain_name+obj.head_portrait.url
-
     class Meta:
         model = User
-        fields = ['id','head_portrait','is_attention']
+        fields = ['id','head_portrait','is_attention','desc']
 
 
 class UserSearchSerializer(HaystackSerializer):

@@ -20,5 +20,8 @@ class UploadTokenView(APIView):
         bucket_name = QINIU_BUCKET_NAME
         # 生成上传 Token，可以指定过期时间等
         # 3600为token过期时间，秒为单位。3600等于一小时
-        token = q.upload_token(bucket_name, 3600)
+        token = q.upload_token(bucket=bucket_name, expires=3600)
         return Response({'uptoken':token})
+
+
+

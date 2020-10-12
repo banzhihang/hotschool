@@ -2,7 +2,7 @@ import redis
 
 from rest_framework import serializers
 
-from HotSchool.settings import POOL, domain_name
+from HotSchool.settings import POOL,ANONYMITY_USER_HEAD_IMAGE
 from question.models import Answer, Question
 
 
@@ -16,10 +16,9 @@ class AnswerRecommendSerializer(serializers.ModelSerializer):
 
     def get_user_head_portrait(self, answer):
         if answer.is_anonymity:
-            path = domain_name + '/media/headimage/anonymity.jpg'
-            return path
+            return ANONYMITY_USER_HEAD_IMAGE
         else:
-            return domain_name + answer.user.head_portrait.url
+            return answer.user.head_portrait
 
     def get_user_nick_name(self, answer):
         if answer.is_anonymity:

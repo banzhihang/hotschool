@@ -6,7 +6,7 @@ from rest_framework.views import APIView
 from HotSchool.settings import POOL
 from food.models import WantEat, Food, Eated, ShortComment, Discuss, FoodComment, FoodRevert
 from operation.extra import load_answer_operation, add_user_dynamic
-from puclic import Authtication
+from puclic import Authtication, check_undefined
 from question.extra import add_question_operation_data, add_user_operation_data
 from question.models import Comment, Revert
 from question.tasks import push_to_user
@@ -17,6 +17,7 @@ class ApprovalView(APIView):
     """赞同视图"""
     authentication_classes = [Authtication, ]
 
+    @check_undefined
     def get(self, request):
         """
         给回答，评论，回复赞同或者取消赞同
@@ -219,6 +220,7 @@ class LikeView(APIView):
     """喜欢视图"""
     authentication_classes = [Authtication, ]
 
+    @check_undefined
     def get(self, request):
         """
         喜欢回答
@@ -260,6 +262,7 @@ class CollectView(APIView):
     """收藏视图"""
     authentication_classes = [Authtication, ]
 
+    @check_undefined
     def get(self, request):
         """
         收藏问题或者回答
@@ -337,6 +340,7 @@ class AttentionView(APIView):
     """关注视图"""
     authentication_classes = [Authtication, ]
 
+    @check_undefined
     def get(self,request):
         target_user_id = request.GET.get('target')
         user_id = request.user.pk
