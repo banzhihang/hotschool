@@ -2,13 +2,12 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="a9a08896-2fca-4be8-8719-007b9aad069b" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/image/a.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/image/b.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/image/c.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/image/d.jpg" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/HotSchool/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/HotSchool/settings.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/a.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/b.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/c.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/d.jpg" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -456,7 +455,7 @@
       <workItem from="1605259329430" duration="612000" />
       <workItem from="1605274098667" duration="6000" />
       <workItem from="1605316147690" duration="430000" />
-      <workItem from="1605514592924" duration="428000" />
+      <workItem from="1605514592924" duration="1232000" />
     </task>
     <servers />
   </component>
