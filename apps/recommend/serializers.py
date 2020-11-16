@@ -46,11 +46,11 @@ class QuestionRecommendSerializer(serializers.ModelSerializer):
     type = serializers.IntegerField(default=1)
     class Meta:
         model = Question
-        fields = ['type','id','title','content']
+        fields = ['type','id','title','abstract','scan_number','attention_number']
 
 
 class LatestQuestionSerializer(serializers.ModelSerializer):
     """最新问题序列化器"""
     class Meta:
         model = Question
-        fields = ['id','title','content']
+        fields = ['id','title','content','scan_number','attention_number']

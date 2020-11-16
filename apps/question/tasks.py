@@ -1,4 +1,4 @@
-import base64
+import json
 import re
 import time
 from datetime import datetime,timedelta
@@ -8,7 +8,7 @@ from bs4 import BeautifulSoup
 from django.db.models import F
 
 from HotSchool.celery import app
-from HotSchool.settings import domain_name, POOL
+from HotSchool.settings import  POOL
 from communicate.extra import notification_user
 from food.models import Discuss, FoodComment
 from question.algorithms import calculate_question_hot_score
@@ -31,7 +31,7 @@ def push_to_user(from_user, to_user, type, instance=None,content=None):
     # 回复人的昵称
     user_nick_name = from_user.nick_name
     # 回复人的头像url
-    user_head_portrait = domain_name + from_user.head_portrait.url
+    user_head_portrait = from_user.head_portrait
     if type == 3:  # 回复
         # 该回复所属的回答,和评论
         answer_set = Answer.objects.filter(comment__revert=instance).values('id', 'question__title','question_id')
@@ -92,7 +92,7 @@ def calculate_question_and_sync(question_id):
     执行时间:第二天半夜1点
     """
     yesterday = (datetime.now() - timedelta(days=1)).strftime('%Y%m%d')  # 昨天的时间字符串
-    today = datetime.now()
+    today_time = datetime.now()
     coon = redis.Redis(connection_pool=POOL)
     # 获取问题数据
     question_data = coon.hmget('qd:'+str(question_id)+':'+yesterday,'scan','answer','approval','attention','comment',
@@ -106,11 +106,13 @@ def calculate_question_and_sync(question_id):
         today = datetime.now().strftime('%Y%m%d')
         scan_num,answer_num,approval_num,attention_num,comment_num,collect_num = question_data[0],question_data[1],question_data[2],question_data[3],question_data[4],question_data[5]
         # 计算热度值
-        score = calculate_question_hot_score(scan_num,answer_num,approval_num,attention_num,collect_num,collect_num)
+        score = calculate_question_hot_score(scan_num if scan_num else 0,answer_num if answer_num else 0,
+            approval_num if approval_num else 0,attention_num if attention_num else 0,
+                comment_num if comment_num else 0, collect_num if collect_num else 0)
         # 检查是否已经设置(计算该学校热榜帮名)的定时任务
         is_exist = coon.exists('hot:' + str(school_id) + ':' + today)
         if not is_exist:
-            execute_time = datetime.utcfromtimestamp(datetime(today.year, today.month, today.day, 1, 20, 0).timestamp())
+            execute_time = datetime.fromtimestamp(datetime(today_time.year, today_time.month, today_time.day, 1, 20, 0).timestamp())
             calculate_school_hot_rank.apply_async(args=[school_id],eta=execute_time)
         # 添加到对应学校的热榜
         coon.zadd('hot:' + str(school_id) + ':' + today, {question_id: score})
@@ -177,8 +179,8 @@ def get_answer_abstract_and_first_image(answer_id):
     except Answer.DoesNotExist:
         pass
     else:
-        html = base64.decode(answer.content)
-        pattern = re.compile("img src='(.*?)'")
+        html = json.loads(answer.content)
+        pattern = re.compile('img src="(.*?)"')
         # 获得第一张图片
         img_url = pattern.search(html)
         # 获得回答摘要
@@ -186,9 +188,30 @@ def get_answer_abstract_and_first_image(answer_id):
         if img_url:
             # 保存至数据库
             answer.first_image = img_url[1]
-            answer.abstract = clean_text[0:38]+'...'
-            answer.save()
-        else:
-            answer.abstract = clean_text[0:38]+'...'
-            answer.save()
 
+        if len(clean_text)>38:
+            answer.abstract = clean_text[0:38]+'...'
+        else:
+            answer.abstract = clean_text[0:38]
+        answer.save()
+
+
+@app.task
+def get_question_abstract(question_id):
+    """获得问题摘要"""
+    try:
+        question = Question.objects.get(pk=question_id)
+    except Question.DoesNotExist:
+        pass
+    else:
+        if question.content:
+            html = json.loads(question.content)
+            clean_text = BeautifulSoup(html, "lxml").get_text(strip=True)
+            if len(clean_text) >38:
+                question.abstract = clean_text[0:38] + '...'
+            else:
+                question.abstract = clean_text[0:38]
+        else:
+            question.abstract = ''
+
+        question.save()

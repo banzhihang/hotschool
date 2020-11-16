@@ -103,8 +103,8 @@ import redis
 
 from question.algorithms import calculate_question_hot_score
 
-POOL = redis.ConnectionPool(host='127.0.0.1', port=6379,db=1,decode_responses=True)
-# coon = redis.Redis(connection_pool=POOL)
+# POOL = redis.ConnectionPool(host='127.0.0.1', port=6379,db=1,decode_responses=True)
+# # coon = redis.Redis(connection_pool=POOL)
 # a = coon.exists('ad:1')
 # print(a)
 
@@ -170,9 +170,9 @@ POOL = redis.ConnectionPool(host='127.0.0.1', port=6379,db=1,decode_responses=Tr
 #     coon.delete('qd:'+str(question_id)+':'+yesterday)
 #
 # calculate_question_and_syn(1)
-coon = redis.Redis(connection_pool=POOL)
-answer_id = coon.zrange('answer:score:2',start=100,end=100)
-print(answer_id)
+# coon = redis.Redis(connection_pool=POOL)
+# answer_id = coon.zrange('answer:score:2',start=100,end=100)
+# print(answer_id)
 
 
 # def get_openid_image(self):
@@ -192,3 +192,4 @@ print(answer_id)
 #         tail = re.findall(pattern, image_type)
 #         image = InMemoryUploadedFile(image, None, uuid_string()
 #                                      + '.' + tail[0], None, len(res3), None, None)
+

@@ -1,10 +1,9 @@
 import time
 
 import redis
-from django.contrib.auth.models import AnonymousUser
 from rest_framework import serializers
 
-from HotSchool.settings import domain_name, POOL, ANONYMITY_USER_HEAD_IMAGE
+from HotSchool.settings import POOL, ANONYMITY_USER_HEAD_IMAGE
 from food.models import Food
 from puclic import verify_serializers
 from question.models import *
@@ -298,7 +297,8 @@ class CollectCommentInfoSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Comment
-        fields = ['id','question','nick_name','head_portrait','question_title','answer','add_time','content','revert_number']
+        fields = ['id','question','nick_name','head_portrait','question_title','answer','add_time','content',
+                  'revert_number']
 
 
 

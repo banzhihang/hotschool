@@ -5,10 +5,10 @@ from rest_framework.response import Response
 
 
 class RecommentQuestionByTimePagination(CursorPagination):
-    """用户关注和被关注分页器"""
+    """推荐按时间推荐分页器"""
 
     # 每页默认数量
-    page_size = 2
+    page_size = 10
     # 每页最大显示数量
     max_page_size = 20
     # 排序

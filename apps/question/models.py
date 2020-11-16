@@ -4,6 +4,7 @@ from django.db import models
 class Question(models.Model):
     """问题表"""
     title = models.CharField(max_length=100, verbose_name="问题标题", default='')
+    abstract = models.CharField(max_length=100,verbose_name='问题摘要',default='')
     content = models.TextField(max_length=200, verbose_name='问题内容', default='')
     attention_number = models.IntegerField(verbose_name='关注人数', default=0)
     scan_number = models.IntegerField(verbose_name='浏览总量', default=0)

@@ -8,7 +8,7 @@ class RevertByTimePagination(CursorPagination):
     """回复分页(以添加时间排序的情况)"""
 
     # 每页默认数量
-    page_size = 25
+    page_size = 15
     # 排序规则
     ordering = 'add_time'
     # 每页最大显示数量

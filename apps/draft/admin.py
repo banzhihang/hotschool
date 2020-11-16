@@ -1,3 +1,5 @@
 from django.contrib import admin
 
-# Register your models here.
+from draft.models import AnswerDraft, FoodDraft
+
+admin.site.register([AnswerDraft,FoodDraft])

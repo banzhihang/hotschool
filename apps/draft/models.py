@@ -7,6 +7,7 @@ class AnswerDraft(models.Model):
     question = models.ForeignKey('question.Question', on_delete=models.CASCADE, verbose_name='所属问题')
     is_anonymity = models.IntegerField(choices=((0, '不匿名'), (1, '匿名')), default=0, verbose_name='是否匿名')
     content = models.TextField(max_length=100000, verbose_name='用户回答', default='')
+    abstract = models.CharField(max_length=18,verbose_name="草稿摘要",default='')
     add_time = models.DateTimeField(auto_now_add=True, verbose_name='添加时间')
     modify_time = models.DateTimeField(auto_now = True, verbose_name='修改时间',db_index=True)
 

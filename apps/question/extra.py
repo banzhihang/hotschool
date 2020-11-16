@@ -34,7 +34,7 @@ def add_question_operation_data(operation, question_id, type=None):
 
             # 添加一个定时任务,第二天半夜一点计算热度值,并同步数据到数据库
             tomorrow = datetime.datetime.now() + datetime.timedelta(days=1)
-            execute_time = datetime.datetime.utcfromtimestamp(datetime.datetime(
+            execute_time = datetime.datetime.fromtimestamp(datetime.datetime(
                 tomorrow.year, tomorrow.month, tomorrow.day, 1, 0, 0).timestamp())
             calculate_question_and_sync.apply_async(args=[question_id], eta=execute_time)
 
@@ -70,7 +70,7 @@ def add_user_operation_data(operation, target_user_id, type=None, user_id=None, 
             expireat_time = datetime.datetime(after_tomorrow.year, after_tomorrow.month, after_tomorrow.day, 0, 1, 0)
             coon.expireat('ud:' + today + ':' + str(target_user_id), expireat_time)
             # 明天4点将该用户的创作者数据同步到数据库
-            execute_time = datetime.datetime.utcfromtimestamp(datetime.datetime(
+            execute_time = datetime.datetime.fromtimestamp(datetime.datetime(
                 tomorrow.year, tomorrow.month, tomorrow.day, 4, 0, 0).timestamp())
             sync_user_operation.apply_async(args=[target_user_id], eta=execute_time)
 
@@ -93,10 +93,10 @@ def add_user_operation_data(operation, target_user_id, type=None, user_id=None, 
             else:
                 # 相应作者的对应数据加一
                 coon.hincrby('ud:' + today + ':' + str(target_user_id), operation, 1)
-                # 检查该作者的浏览记录zset长度(若不存在该键，则返回0)，若大于1000,就删除最后500个。添加之前先删除之前该回答的浏览记录，相当于更新时间戳
+                # 检查该作者的浏览记录zset长度(若不存在该键，则返回0)，若大于300,就删除最后150个。添加之前先删除之前该回答的浏览记录，相当于更新时间戳
                 user_recentbrowse_length = coon.zcard('recentbrowse:' + str(user_id))
-                if user_recentbrowse_length >= 1000:
-                    coon.zremrangebyrank('recentbrowse:' + str(user_id), min=0, max=500)
+                if user_recentbrowse_length >= 300:
+                    coon.zremrangebyrank('recentbrowse:' + str(user_id), min=0, max=150)
                 coon.zrem('recentbrowse:' + str(user_id), str(answer_id))
                 coon.zadd('recentbrowse:' + str(user_id), {str(answer_id): now_timestamp})
 

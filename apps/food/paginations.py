@@ -84,7 +84,7 @@ class DiscussByCommentNumberPagination(CursorPagination):
     """讨论分页器(按评论数排序)"""
 
     # 每页默认数量
-    page_size = 20
+    page_size = 10
     # 排序规则
     ordering = '-approval_number'
     # 每页最大显示数量
@@ -102,7 +102,7 @@ class DiscussByTimePagination(CursorPagination):
     """讨论分页器(按时间排序)"""
 
     # 每页默认数量
-    page_size = 20
+    page_size = 10
     # 排序规则
     ordering = '-add_time'
     # 每页最大显示数量

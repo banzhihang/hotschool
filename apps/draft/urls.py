@@ -9,5 +9,4 @@ urlpatterns = [
     path('answer', AnswerDraftView.as_view()),
     # 美食草稿
     path('food',FoodDraftView.as_view())
-
 ]

@@ -2,10 +2,8 @@ import json
 import re
 import time
 import uuid
-from io import BytesIO
 import requests
 
-from django.core.files.uploadedfile import InMemoryUploadedFile
 from rest_framework.response import Response
 import redis
 
@@ -16,7 +14,7 @@ from user.models import User, UserDynamic
 
 def uuid_string():
     # 产生uuid字符串，当作图片的名字
-    str_timestamp = time.time()
+    str_timestamp = str(time.time())
     return str(uuid.uuid3(uuid.NAMESPACE_DNS, str_timestamp)).replace('-','') # 去掉破折号
 
 
@@ -42,6 +40,10 @@ class OpenIdAndImage:
         self.openid_url = 'https://api.weixin.qq.com/sns/jscode2session'
         self.app_id = 'wx35df04e950c9cad8'
         self.app_secret = '7107762d645e15f6f49bdfb0e4180aa4'
+
+        # self.openid_url = 'https://api.q.qq.com/sns/jscode2session'
+        # self.app_id = '1111100379'
+        # self.app_secret = '4Ohn6gkI81JWLZGT'
         self.code = code
 
     def get_openid(self):
@@ -51,13 +53,14 @@ class OpenIdAndImage:
         try:
             openid = res1.json()['openid']
         except:
-            return Response({"msg": "登录失败"})
+            return None
         else:
             return openid
 
 
 def create_user_dynamic(user_id):
     """
+    创建用户动态
     :param user: 动态所属用户
     :param answer:动态所属回答
     :param question:动态所属问题
@@ -103,5 +106,5 @@ def create_user_dynamic(user_id):
                     dynamic['user'] = user
                     j = UserDynamic(**dynamic)
                     dynamics.append(j)
-            # 批量插入
+            # 批量插入,提高性能
             UserDynamic.objects.bulk_create(dynamics)

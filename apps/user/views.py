@@ -1,4 +1,4 @@
-from datetime import datetime,timedelta
+from datetime import datetime, timedelta
 
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -7,7 +7,7 @@ from rest_framework_jwt.settings import api_settings
 from puclic import Authtication, get_ordering, LooseAuthtication, check_undefined
 from question.paginations import CollectCommentByTimePagination
 from question.serializers import RevertInfoSerializer
-from .extra import OpenIdAndImage,uuid_string,create_user_dynamic
+from .extra import OpenIdAndImage, uuid_string, create_user_dynamic
 from .paginations import UserAttentionPagination, UserCreateByTimePagination, UserCollectPagination, \
     UserDynamicByTimePagination, UserRecentPagination
 from .serializers import *
@@ -21,29 +21,33 @@ class LoginView(APIView):
             jscode = request.data['code']
             nick_name = request.data['nickName']
             head_portrait_url = request.data['avatarUrl']
-
         except Exception:
             return Response({"msg": "登录失败"})
 
         # 获得用户openid和头像，若用户存在数据库，则不更新用户昵称和头像(用户可能存在自定义昵称头像)。
         #  若不存在，就用获得的昵称和头像创建用户
-        openid= OpenIdAndImage(jscode).get_openid()
+        openid = OpenIdAndImage(jscode).get_openid()
+        if not openid:
+            return Response({'msg':'登录失败','status':'fail'})
+
         try:
             user = User.objects.get(we_chat_openid=openid)
         except User.DoesNotExist:
             # 使用随机字符串当作用户名，openid当作密码
             user = User.objects.create(nick_name=nick_name, username=uuid_string(),
                                        head_portrait=head_portrait_url, we_chat_openid=openid, password=openid)
-            user.save()
+            # 同时创建用户的创作者数据表
+            UserData.objects.create(user_id=user.pk)
 
-        head_portrait,nick_name,user_id= user.head_portrait,user.nick_name,user.pk
+        head_portrait, nick_name, user_id, school = user.head_portrait, user.nick_name, user.pk, user.school.id
         # 生成token
         jwt_payload_handler = api_settings.JWT_PAYLOAD_HANDLER
         jwt_encode_handler = api_settings.JWT_ENCODE_HANDLER
         payload = jwt_payload_handler(user)
         token = jwt_encode_handler(payload)
 
-        return Response({'id':user_id,'token': token, "openid": openid,'head_portrait':head_portrait,'nick_name':nick_name})
+        return Response({'id': user_id, 'token': token, "openid": openid, 'head_portrait': head_portrait,
+                         'nick_name': nick_name,'school': school,'status':'ok'})
 
 
 class UserInfoView(APIView):
@@ -90,22 +94,24 @@ class RecentBrowseView(APIView):
 
         page = UserRecentPagination()
         page_roles = page.paginate_queryset(queryset=recent_browse_answers, request=request, view=self)
-        answers = UserRecentBrowseAnswerSerializer(instance=page_roles,many=True, context={'request': request})
+        answers = UserRecentBrowseAnswerSerializer(instance=page_roles, many=True, context={'request': request})
 
         return page.get_paginated_response(answers.data)
 
     def delete(self, request):
         # 删除用户浏览数据，前端传来用户删除的回答的id组成的列表
         # 获得该列表之后去redis将用户数据删除
-        answer_record_list = request.data['answer_record_list']
-        try:
-            coon = redis.Redis(connection_pool=POOL)
-            coon.zrem('recentbrowse:' + str(request.user.pk), *answer_record_list)
-            status = 'ok'
-        except:
-            status = 'fail'
-
-        return Response({'status': status})
+        answer_record_list = request.data.get("answer_record_list")
+        if answer_record_list:
+            try:
+                coon = redis.Redis(connection_pool=POOL)
+                coon.zrem('recentbrowse:' + str(request.user.pk), *answer_record_list)
+                status = 'ok'
+            except:
+                status = 'fail'
+            return Response({'status': status})
+        else:
+            return Response("错误")
 
 
 class MyPublishView(APIView):
@@ -120,7 +126,7 @@ class MyPublishView(APIView):
         try:
             type = int(request.GET.get('type'))
         except:
-            return Response({'error': '发生错误'})
+            return Response('发生错误')
 
         page = UserCreateByTimePagination()
         if type == 0:
@@ -163,10 +169,10 @@ class MyCollectView(APIView):
         try:
             type = int(request.GET.get('type'))
         except:
-            return Response({'error': '发生错误'})
+            return Response('发生错误')
         else:
             if type == 0:
-                questions =  UserCollectQuestion.objects.select_related('question').filter(user_id=request.user.pk)
+                questions = UserCollectQuestion.objects.select_related('question').filter(user_id=request.user.pk)
                 # 分页
                 page = UserCreateByTimePagination()
                 page_roles = page.paginate_queryset(queryset=questions, request=request, view=self)
@@ -201,11 +207,16 @@ class UserInfoShowView(APIView):
     def get(self, request, user_id):
         """获取用户创作数据"""
         try:
+            user_id = int(user_id)
+        except:
+            return Response('发生错误')
+
+        try:
             userinfo_set = UserData.objects.get(user=user_id)
-            userinfo = UserInfoShowSerializer(instance=userinfo_set, many=False, context={'request': request})
-        except Exception:
+        except UserData.DoesNotExist:
             return Response({'error': '没有该用户'})
         else:
+            userinfo = UserInfoShowSerializer(instance=userinfo_set, many=False, context={'request': request})
             return Response(userinfo.data)
 
 
@@ -215,6 +226,8 @@ class UserDynamicView(APIView):
     @check_undefined
     def get(self, request, user_id):
         """获取用户动态"""
+
+        # 获取用户动态前先将redis中的动态同步到数据库
         create_user_dynamic(user_id)
         user_dynamic_set = UserDynamic.objects.filter(user=user_id).select_related('answer')
         if not user_dynamic_set:
@@ -232,13 +245,13 @@ class UserAttention(APIView):
     authentication_classes = [LooseAuthtication, ]
 
     @check_undefined
-    def get(self,request,user_id):
+    def get(self, request, user_id):
         try:
-            type = int(request.GET.get('type',0))
+            type = int(request.GET.get('type', 0))
         except:
-            return Response({'status':'fail','error':'发生错误'})
+            return Response('发生错误')
         # 0表示用户关注的人,1表示关注用户关注的人
-        if type in (0,1):
+        if type in (0, 1):
             if type == 0:
                 coon = redis.Redis(connection_pool=POOL)
                 attention_id_list = coon.smembers('attention:' + str(user_id))
@@ -260,24 +273,32 @@ class UserCreatorDataView(APIView):
     authentication_classes = [Authtication, ]
 
     @check_undefined
-    def get(self,request):
+    def get(self, request):
         """获得用户昨日的创作者数据"""
         user_id = request.user.pk
-        yesterday = (datetime.now() - timedelta(days=1)).strftime('%Y%m%d') # 昨天的时间字符串
+        yesterday = (datetime.now() - timedelta(days=1)).strftime('%Y%m%d')  # 昨天的时间字符串
         coon = redis.Redis(connection_pool=POOL)
-        is_exist = coon.exists('ud:'+yesterday+':'+str(user_id))
+        is_exist = coon.exists('ud:' + yesterday + ':' + str(user_id))
         if is_exist:
-            user_data = coon.hmget('ud:' + yesterday + ':' + str(user_id), 'read', 'approval', 'like', 'collect','attention')
+            user_data = coon.hmget('ud:' + yesterday + ':' + str(user_id), 'read', 'approval', 'like', 'collect',
+                                   'attention')
             data = {
-                'read':int(user_data[0]),
-                'approval':int(user_data[1]),
-                'like':int(user_data[2]),
-                'collect':int(user_data[3]),
-                'attention':int(user_data[4])
+                'read': int(user_data[0]),
+                'approval': int(user_data[1]),
+                'like': int(user_data[2]),
+                'collect': int(user_data[3]),
+                'attention': int(user_data[4])
             }
             return Response(data)
         else:
-            return Response({})
+            data = {
+                'read': 0,
+                'approval': 0,
+                'like': 0,
+                'collect': 0,
+                'attention': 0
+            }
+            return Response(data)
 
 
 class CollectCommentInfoView(APIView):
@@ -285,38 +306,34 @@ class CollectCommentInfoView(APIView):
     authentication_classes = [Authtication, ]
 
     @check_undefined
-    def get(self,request):
+    def get(self, request):
         """获得评论详情"""
-        comment_id = request.GET.get('comment')
-        cursor = request.GET.get('cursor')
-        if comment_id:
-            try:
-                comment_set = Comment.objects.get(pk=comment_id)
-            except Comment.DoesNotExist:
-                return Response({"error":'没有该评论'})
-            else:
-                revert_set = Revert.objects.filter(comment_id=comment_id)
-                page = CollectCommentByTimePagination()
-                page_roles = page.paginate_queryset(queryset=revert_set, request=request, view=self)
-                reverts = RevertInfoSerializer(instance=page_roles, many=True, context={'request': request})
-                # 若不存在cursor,则说明请求的是第一页,返回评论数据,若存在cursor,则说明不是第一页,返回的数据中commnet为{}
-                if not cursor:
-                    comment = CollectCommentInfoSerializer(instance=comment_set,many=False,context={'request': request})
-                    return page.get_paginated_response(comment.data,reverts.data)
-                else:
-                    return page.get_paginated_response({}, reverts.data)
+        cursor = int(request.GET.get('cursor'))
+        try:
+            comment_id = int(request.GET.get('comment'))
+        except:
+            return Response('发生错误')
+
+        try:
+            comment_set = Comment.objects.get(pk=comment_id)
+        except Comment.DoesNotExist:
+            return Response({"error": '没有该评论'})
         else:
-            return Response({})
+            revert_set = Revert.objects.filter(comment_id=comment_id)
+            page = CollectCommentByTimePagination()
+            page_roles = page.paginate_queryset(queryset=revert_set, request=request, view=self)
+            reverts = RevertInfoSerializer(instance=page_roles, many=True, context={'request': request})
+            # 若不存在cursor,则说明请求的是第一页,返回评论数据,若存在cursor,则说明不是第一页,返回的数据中commnet为{}
+            if not cursor:
+                comment = CollectCommentInfoSerializer(instance=comment_set, many=False,
+                                                       context={'request': request})
+                return page.get_paginated_response(comment.data, reverts.data)
+            else:
+                return page.get_paginated_response({}, reverts.data)
 
 
-class DeleteTestView(APIView):
+
+class HelloWorldView(APIView):
+    """测试视图"""
     def get(self,request):
-        old_picture_url = 'https://hotschool.ltd/IMG_20190503_193130.jpg'
-        a, b = QiNiuFileManage(old_picture_url).delete()
-        print(a)
-        print(b)
-        return Response('a')
-
-
-
-
+        return Response("hello! Is Ok!")

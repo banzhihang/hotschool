@@ -16,6 +16,12 @@ from datetime import timedelta, datetime
 import django_celery_results
 import redis
 
+import logging
+import django.utils.log
+import logging.handlers
+
+
+
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(BASE_DIR, 'apps'))
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
@@ -33,12 +39,106 @@ QINIU_BUCKET_NAME = 'hotschool'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
-# 域名
-domain_name = 'http://10.129.8.26:8000'
+
+log_path = os.path.join(BASE_DIR, "logs")
+if not os.path.exists(log_path):
+    os.makedirs("logs")
+
+
+# LOGGING = {
+#     'version': 1,  # 保留字
+#     'disable_existing_loggers': False,  # 禁用已经存在的logger实例
+#     # 日志文件的格式
+#     'formatters': {
+#         # 详细的日志格式
+#         'standard': {
+#             'format': '[%(asctime)s][%(threadName)s:%(thread)d][task_id:%(name)s][%(filename)s:%(lineno)d]'
+#                       '[%(levelname)s][%(message)s]'
+#         },
+#         # 简单的日志格式
+#         'simple': {
+#             'format': '[%(levelname)s][%(asctime)s][%(filename)s:%(lineno)d]%(message)s'
+#         },
+#         # 定义一个特殊的日志格式
+#         'collect': {
+#             'format': '%(message)s'
+#         }
+#     },
+#     # 过滤器
+#     'filters': {
+#         'require_debug_true': {
+#             '()': 'django.utils.log.RequireDebugTrue',
+#         },
+#     },
+#     # 处理器
+#     'handlers': {
+#         'console': {     # 在终端打印
+#             'level': 'DEBUG',
+#             'filters': ['require_debug_true'],  # 只有在Django debug为True时才在屏幕打印日志
+#             'class': 'logging.StreamHandler',  #
+#             'formatter': 'simple'
+#         },
+#         'default': {    # 默认的
+#             'level': 'INFO',
+#             'class': 'logging.handlers.RotatingFileHandler',  # 保存到文件，自动切
+#             'filename': os.path.join(BASE_DIR+'/logs/', "all.log"),  # 日志文件
+#             'maxBytes': 1024 * 1024 * 50,                    # 日志大小 50M
+#             'backupCount': 3,                                # 最多备份几个
+#             'formatter': 'standard',
+#             'encoding': 'utf-8',
+#         },
+#         'error': {   # 专门用来记错误日志
+#             'level': 'ERROR',
+#             'class': 'logging.handlers.RotatingFileHandler',  # 保存到文件，自动切
+#             'filename': os.path.join(BASE_DIR+'/logs/', "error.log"),  # 日志文件
+#             'maxBytes': 1024 * 1024 * 50,  # 日志大小 50M
+#             'backupCount': 5,
+#             'formatter': 'standard',
+#             'encoding': 'utf-8',
+#         },
+#         'collect': {   # 专门定义一个收集特定信息的日志
+#             'level': 'INFO',
+#             'class': 'logging.handlers.RotatingFileHandler',  # 保存到文件，自动切
+#             'filename': os.path.join(BASE_DIR+'/logs/', "collect.log"),
+#             'maxBytes': 1024 * 1024 * 50,  # 日志大小 50M
+#             'backupCount': 5,
+#             'formatter': 'collect',
+#             'encoding': "utf-8"
+#         },
+#         'scprits_handler': {
+#             'level':'DEBUG',
+#             'class':'logging.handlers.RotatingFileHandler',
+#             'filename': os.path.join(BASE_DIR+'/logs/', "script.log"),
+#             'maxBytes': 1024*1024*5,
+#             'backupCount': 5,
+#             'formatter':'standard',
+#         }
+#     },
+#     'loggers': {
+#         'django': {             # 默认的logger应用如下配置
+#             'handlers': ['default', 'console', 'error'],  # 上线之后可以把'console'移除
+#             'level': 'DEBUG',
+#             'propagate': True,  # 向不向更高级别的logger传递
+#         },
+#         'collect': {      # 名为 'collect'的logger还单独处理
+#             'handlers': ['console', 'collect'],
+#             'level': 'INFO',
+#         },
+#         'scripts': {
+#             'handlers': ['scprits_handler'],
+#             'level': 'INFO',
+#             'propagate': False
+#         },
+#     },
+# }
 
 ALLOWED_HOSTS = ['*']
 
+# drf设置
 REST_FRAMEWORK = {
+    'DEFAULT_RENDERER_CLASSES':[
+        'rest_framework.renderers.JSONRenderer',
+    ],
 }
 
 # channel设置
@@ -52,12 +152,13 @@ CHANNEL_LAYERS = {
     },
 }
 
+# 跨域设置
 CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOW_CREDENTIALS = True
 
 # jwt过期时间
 JWT_AUTH = {
-    'JWT_EXPIRATION_DELTA': timedelta(days=1000)
+    'JWT_EXPIRATION_DELTA': timedelta(days=10)
 }
 
 # celery配置·
@@ -70,7 +171,6 @@ CELERY_ACCEPT_CONTENT = ['json', 'pickle']  # 接受的数据类型
 # Application definition
 INSTALLED_APPS = [
     'channels',
-    'simpleui',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -80,7 +180,6 @@ INSTALLED_APPS = [
     'corsheaders',
     'haystack',
     'rest_framework',
-    'django_celery_beat',
     'user',
     'question',
     'operation',
@@ -118,19 +217,14 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
             ],
-            'libraries': {
-                'simpleui': 'simpleui.templatetags.simpletags'
-            },
-
         },
     },
 ]
 
 WSGI_APPLICATION = 'HotSchool.wsgi.application'
 
-# Database
-# https://docs.djangoproject.com/en/2.2/ref/settings/#databases
 
+# 数据库相关配置
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
@@ -143,13 +237,14 @@ DATABASES = {
 # haystack配置
 HAYSTACK_CONNECTIONS = {
     'default': {
-        'ENGINE': 'haystack.backends.elasticsearch2_backend.Elasticsearch2SearchEngine',
+        'ENGINE': 'apps.search.elasticsearch2_ik_backend.Elasticsearch2IkSearchEngine',
         'URL': 'http://127.0.0.1:9200/',
         'INDEX_NAME': 'haystack',
     },
 }
-# 当添加、修改、删除数据时，自动更新索引
+# 搜索引擎设置 当添加、修改、删除数据时，自动更新索引
 HAYSTACK_SIGNAL_PROCESSOR = 'haystack.signals.RealtimeSignalProcessor'
+HAYSTACK_SEARCH_RESULTS_PER_PAGE = 10
 
 # Django的缓存配置
 CACHES = {
@@ -170,8 +265,7 @@ REST_FRAMEWORK_EXTENSIONS = {
     'DEFAULT_USE_CACHE': 'default',
 }
 
-# Password validation
-# https://docs.djangoproject.com/en/2.2/ref/settings/#auth-password-validators
+
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -188,9 +282,8 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-# Internationalization
-# https://docs.djangoproject.com/en/2.2/topics/i18n/
 
+# redis连接池
 POOL = redis.ConnectionPool(host='127.0.0.1', port=6379, db=1, decode_responses=True)
 
 LANGUAGE_CODE = 'zh-hans'
@@ -199,7 +292,8 @@ USE_I18N = True
 USE_L10N = True
 USE_TZ = False
 
-RECOMMENT_NUMBER = 5
+# 推荐数量
+RECOMMENT_NUMBER = 8
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
@@ -207,7 +301,8 @@ RECOMMENT_NUMBER = 5
 STATIC_URL = '/static/'
 MEDIA_URL = '/media/'
 
-ANONYMITY_USER_HEAD_IMAGE = 'https://hotschool.ltd/u%3D2632989821%2C2608635516%26fm%3D26%26gp%3D0.jpg'
+# 匿名头像url
+ANONYMITY_USER_HEAD_IMAGE = 'https://qiniu.ifelse.top/20201013165636583.png'
 
+# 静态文件路径
 STATIC_ROOT = os.path.join(BASE_DIR, "static")
-SIMPLEUI_DEFAULT_THEME = 'admin.lte.css'

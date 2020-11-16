@@ -8,7 +8,7 @@ class UserSearchPagination(PageNumberPagination):
     """搜索用户分页器"""
 
     # 每页默认数量
-    page_size = 20
+    page_size = 15
     # 每页最大显示数量
     max_page_size = 30
 

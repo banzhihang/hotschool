@@ -13,6 +13,7 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+
 from django.contrib import admin
 from django.urls import path, include, re_path
 from django.views.static import serve
@@ -21,9 +22,7 @@ from HotSchool import settings
 from question.views import QuestionView
 from recommend.views import RecommendView
 from upload.views import UploadTokenView
-
-from user.views import LoginView
-
+from user.views import LoginView, HelloWorldView
 
 urlpatterns = [
     # 管理员
@@ -52,4 +51,8 @@ urlpatterns = [
     path('recommend',RecommendView.as_view()),
     # 草稿箱
     path('draft/',include('draft.urls'),name='draft'),
+    # 测试
+    path('a',HelloWorldView.as_view())
 ]
+
+

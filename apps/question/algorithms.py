@@ -9,6 +9,8 @@ def wilson_score_answer(u, n, zP=2.):
     :param zP: 正太分布的分位数(zP一般取值2即可，即95%的置信度)
     :return: 威尔逊得分
     """
+    if n ==0:
+        return 0.0
     pos_rat = u * 1. / n * 1.
     score = (pos_rat + (np.square(zP) / (2. * n))
              - ((zP / (2. * n)) * np.sqrt(4. * n * (1. - pos_rat) * pos_rat + np.square(zP)))) / (1. + np.square(zP) / n)

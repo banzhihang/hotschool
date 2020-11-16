@@ -13,6 +13,7 @@ class FoodRankSerializer(serializers.ModelSerializer):
     name = serializers.CharField()
     image_first = serializers.URLField()
     score = serializers.SerializerMethodField()
+    desc = serializers.SerializerMethodField()
 
     def get_score(self, obj):
         """将分数值舍入到小数点一位来显示"""
@@ -20,6 +21,15 @@ class FoodRankSerializer(serializers.ModelSerializer):
             return None
         else:
             return round(obj.score, 1)
+
+    def get_desc(self,obj):
+        """获得描述,字数大于13就截断同时添加..."""
+        desc = obj.desc
+        if len(desc)<15:
+            return desc
+        else:
+            return desc[0:14]+'...'
+
 
     class Meta:
         model = Food
@@ -53,7 +63,7 @@ class FoodInfoSerializer(serializers.ModelSerializer):
         else:
             return round(obj.score, 1)
 
-    @verify_serializers(type={})
+    @verify_serializers(type=None)
     def get_eat_record(self, obj, user):
         # 先检查该用户是否吃过,吃过则查询记录,否则直接返回空字典
         is_eat = Eated.objects.filter(user=user.pk, food=obj.pk)
@@ -73,7 +83,7 @@ class FoodInfoSerializer(serializers.ModelSerializer):
                 else:
                     return {}
         else:
-            return {}
+            return None
 
     @verify_serializers(type=0)
     def get_is_eat(self, obj, user):
@@ -270,10 +280,10 @@ class PostFoodSerializer(serializers.ModelSerializer):
     flavour = serializers.ListField(required=True, min_length=2)
     image_first = serializers.URLField(required=True, error_messages={'required': '至少2张图片', 'invalid': '地址不合法'})
     image_second = serializers.URLField(required=True, error_messages={'required': '至少2张图片', 'invalid': '地址不合法'})
-    image_third = serializers.URLField(required=False, error_messages={'invalid': '地址不合法'})
-    image_fourth = serializers.URLField(required=False, error_messages={'invalid': '地址不合法'})
-    image_fifth = serializers.URLField(required=False, error_messages={'invalid': '地址不合法'})
-    address_image = serializers.URLField(required=True, error_messages={'required': '地址图片不允许为空', 'invalid': '地址不合法'})
+    image_third = serializers.URLField(required=False,allow_blank=True, error_messages={'invalid': '地址不合法'})
+    image_fourth = serializers.URLField(required=False,allow_blank=True,error_messages={'invalid': '地址不合法'})
+    image_fifth = serializers.URLField(required=False,allow_blank=True,error_messages={'invalid': '地址不合法'})
+    address_image = serializers.URLField(required=True,allow_blank=True,error_messages={'required': '地址图片不允许为空', 'invalid': '地址不合法'})
 
     def validate(self, attr):
         # 验证口味
@@ -300,8 +310,8 @@ class PostFoodSerializer(serializers.ModelSerializer):
     class Meta:
         model = Food
         fields = ['name', 'desc', 'address', 'longitude', 'latitude', 'image_first', 'image_second', 'image_third',
-                  'image_fourth',
-                  'image_fifth', 'address_image', 'flavour', 'school']
+                  'image_fourth','image_fifth', 'address_image', 'flavour', 'school']
+
 
 
 class PostShortCommentSerializer(serializers.ModelSerializer):

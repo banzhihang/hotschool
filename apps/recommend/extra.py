@@ -64,8 +64,8 @@ def add_user_recommend_record(recommend_list,user_id):
     :user_id(用户id)
     """
     coon = redis.Redis(connection_pool=POOL)
-    # 记录过期时间为2天之后
-    expire_time = (datetime.now() + timedelta(days=2)).timestamp()
+    # 记录过期时间为1天之后
+    expire_time = (datetime.now() + timedelta(days=1)).timestamp()
     record_dict = {}
     for i in recommend_list:
         record_dict[i] = expire_time

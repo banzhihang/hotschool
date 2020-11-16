@@ -12,7 +12,7 @@ class AnswerDraftInfoSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = AnswerDraft
-        exclude = 'user'
+        exclude = ['user','abstract']
 
 
 class PostAnswerDraftInfoSerializer(serializers.ModelSerializer):
@@ -51,7 +51,7 @@ class MyAnswerDraftSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = AnswerDraft
-        fields = ['id', 'content', 'question_title', 'modify_time']
+        fields = ['id', 'abstract', 'question_title', 'modify_time']
 
 
 class MyFoodDraftSerializer(serializers.ModelSerializer):
@@ -73,16 +73,22 @@ class FoodDraftInfoSerializer(serializers.ModelSerializer):
     def get_flavour(self, obj):
         # 获得美食的标签
         flavours = obj.flavour.all().values_list('id', 'name')
-        flavours = [{'id': i[0], 'name': i[1]} for i in flavours]
+        if flavours:
+            flavours = [{'id': i[0], 'name': i[1]} for i in flavours]
+        else:
+            flavours = None
         return flavours
 
     def get_school(self, obj):
-        schoo_info = {'id': obj.school_id, 'name': obj.school.name}
+        try:
+            schoo_info = {'id': obj.school_id, 'name': obj.school.name}
+        except AttributeError:
+            schoo_info = None
         return schoo_info
 
     class Meta:
         model = FoodDraft
-        exclude = 'user'
+        exclude = ['user']
 
 
 class PostFoodDraftInfoSerializer(serializers.ModelSerializer):

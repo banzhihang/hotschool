@@ -35,8 +35,8 @@ def load_answer_operation(answer_id):
                    {'approval': answer['approval_number'], 'vote': answer['vote_number'], 'collect': answer['collect_number'],
                     'user': answer['user_id'], 'question': answer['question_id']})
 
-        #  定时30分钟后同步该回答的数据到数据库
-        execute_time = datetime.utcfromtimestamp(
+        #  定时15分钟后同步该回答的数据到数据库
+        execute_time = datetime.fromtimestamp(
             (datetime.now() + timedelta(minutes=15)).timestamp())
         calculate_answer_score.apply_async(args=[answer['question_id'], answer_id], eta=execute_time)
 
@@ -68,7 +68,7 @@ def add_user_dynamic(operation,type,user_id,answer_id=None,question_id=None):
     # 查询该用户的id在不在动态记录set,不存在说明最近半小时redis中没有用户的动态,就创建一个定时任务,半小时后同步用户的动态到数据库
     is_exist = coon.exists('dynamic:' + str(user_id))
     if not is_exist:
-        execute_time = datetime.utcfromtimestamp((datetime.now() + timedelta(minutes=30)).timestamp())
+        execute_time = datetime.fromtimestamp((datetime.now() + timedelta(minutes=30)).timestamp())
         sync_user_dynamic.apply_async(args=[user_id],eta=execute_time)
     # 若operation为add,则为增加动态,若operation为delete则为删除动态
     if operation == 'add':

@@ -21,15 +21,18 @@ class RecommendView(APIView):
     @check_undefined
     def get(self, request):
         """获取推荐"""
-        school = int(request.GET.get('school', -1))
-        type = int(request.GET.get('type', 0))
+        try:
+            school = int(request.GET.get('school', -1))
+            type = int(request.GET.get('type', 0))
+        except:
+            return Response('发生错误')
+
         coon = redis.Redis(connection_pool=POOL)
         user = request.user
-
         # 若用户登录
         if not isinstance(user, AnonymousUser):
             user_id = user.pk
-            # school为0,则推荐不限学校
+            # school为-1,则推荐不限学校
             if school == -1:
                 # type为0,则为默认推荐,为1则为最新推荐
                 if type == 0:

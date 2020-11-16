@@ -90,11 +90,6 @@ attention(关注增量) comment(评论增量) ,collect(该问题的回答的收�
 value:初始值都为0
 
 
-celery -A Clock worker -l info -P eventlet
-flower --port=5555
-celery beat --loglevel=info
-
-
 
 
 answer

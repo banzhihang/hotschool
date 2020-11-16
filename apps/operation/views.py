@@ -61,7 +61,7 @@ class ApprovalView(APIView):
                             add_user_dynamic(operation='add', type=0, user_id=user_id, answer_id=answer_id)
                             # 增加该作者的赞同量
                             add_user_operation_data('approval', target_user_id, type='add')
-                            # 更新回答的分数在load_answer_operation函数中30分钟后执行
+                            # 更新回答的分数在load_answer_operation函数中15分钟后执行
 
                         elif is_approval:
                             # 若赞同过,则为取消赞同,减少该回答的赞同数和投票数,同时将该回答的id从该用户的赞同集合删除
@@ -226,36 +226,36 @@ class LikeView(APIView):
         喜欢回答
         参数:url参数:answer(回答id)
         """
-        answer_id = request.GET.get('answer')
+        try:
+            answer_id = int(request.GET.get('answer'))
+        except:
+            return Response('发生错误')
+
         user_id = request.user.pk
         coon = redis.Redis(connection_pool=POOL)
-
-        if answer_id:
-            answer_id = int(answer_id)
-            target_user_id, question_id = load_answer_operation(answer_id)
-            #  若target_user_id为None,说明该回答不存在,返回 错误信息
-            if not question_id:
-                return Response({'status': 'fail', 'error': '该回答不存在'})
-            try:
-                #  查看是否喜欢,若已经喜欢,则为取消喜欢
-                is_like = coon.getbit('al:' + str(answer_id), user_id)
-                if is_like:
-                    # 将该用户的喜欢位1设置为0,表示取消喜欢记录
-                    coon.setbit('al:' + str(answer_id), user_id, 0)
-                    # 减少该回答的作者的当天喜欢数
-                    add_user_operation_data('like', target_user_id, 'reduce')
-                else:
-                    # 将该用户的喜欢位0设置为1,表示增加喜欢记录
-                    coon.setbit('al:' + str(answer_id), user_id, 1)
-                    # 增加对应问题的喜欢量
-                    add_question_operation_data('approval', question_id)
-                    add_user_operation_data('like', target_user_id, 'add')
-            except Exception:
-                return Response({'status': 'fail', 'error': '发生错误'})
+        target_user_id, question_id = load_answer_operation(answer_id)
+        #  若target_user_id为None,说明该回答不存在,返回 错误信息
+        if not question_id:
+            return Response({'status': 'fail', 'error': '该回答不存在'})
+        try:
+            #  查看是否喜欢,若已经喜欢,则为取消喜欢
+            is_like = coon.getbit('al:' + str(answer_id), user_id)
+            if is_like:
+                # 将该用户的喜欢位1设置为0,表示取消喜欢记录
+                coon.setbit('al:' + str(answer_id), user_id, 0)
+                # 减少该回答的作者的当天喜欢数
+                add_user_operation_data('like', target_user_id, 'reduce')
             else:
-                return Response({'status': 'ok', 'error': ''})
+                # 将该用户的喜欢位0设置为1,表示增加喜欢记录
+                coon.setbit('al:' + str(answer_id), user_id, 1)
+                # 增加对应问题的喜欢量
+                add_question_operation_data('approval', question_id)
+                add_user_operation_data('like', target_user_id, 'add')
+        except Exception:
+            return Response({'status': 'fail', 'error': '发生错误'})
         else:
-            return Response({'status': 'fail', 'error': '没有id'})
+            return Response({'status': 'ok', 'error': ''})
+
 
 
 class CollectView(APIView):
@@ -266,12 +266,11 @@ class CollectView(APIView):
     def get(self, request):
         """
         收藏问题或者回答
-        参数url参数 answer或者question二选一,为收藏或者回答的id
+        参数url参数 answer或者question,food 三选一,为收藏或者回答的id
         """
         answer_id = request.GET.get('answer')
         question_id = request.GET.get('question')
         food_id =request.GET.get('food')
-        user = request.user
         user_id = request.user.pk
         coon = redis.Redis(connection_pool=POOL)
 
@@ -329,7 +328,6 @@ class CollectView(APIView):
                     UserCollectFood.objects.create(user_id=user_id,food_id=food_id)
                 else:
                     is_collect.delete()
-
         except Exception:
             return Response({'status':'fail', 'error': '发生错误'})
         else:
@@ -342,28 +340,28 @@ class AttentionView(APIView):
 
     @check_undefined
     def get(self,request):
-        target_user_id = request.GET.get('target')
+        try:
+            target_user_id = int(request.GET.get('target'))
+        except:
+            return Response('发生错误')
+
         user_id = request.user.pk
         coon = redis.Redis(connection_pool=POOL)
-
-        if target_user_id:
-            target_user_id = int(target_user_id)
-            # 检查是否关注
-            is_attention = coon.sismember('attention:'+str(user_id),target_user_id)
-            if is_attention:
-                # 将目标用户id从关注者关注set删除,同时将关注者id从被关注着被关注set删除
-                coon.srem('attention:'+str(user_id),target_user_id)
-                coon.srem('beattention:'+str(target_user_id),user_id)
-                # 添加被关注者当天的关注量
-                add_user_operation_data('attention',target_user_id,'reduce')
-            else:
-                coon.sadd('attention:'+str(user_id),target_user_id)
-                coon.sadd('beattention:' + str(target_user_id), user_id)
-                add_user_operation_data('attention', target_user_id, 'add')
-                # 异步推送消息给目标用户
-                push_to_user.delay(request.user,target_user_id,2)
-            return Response({'status':'ok','error':''})
+        # 检查是否关注
+        is_attention = coon.sismember('attention:'+str(user_id),target_user_id)
+        if is_attention:
+            # 将目标用户id从关注者关注set删除,同时将关注者id从被关注着被关注set删除
+            coon.srem('attention:'+str(user_id),target_user_id)
+            coon.srem('beattention:'+str(target_user_id),user_id)
+            # 添加被关注者当天的关注量
+            add_user_operation_data('attention',target_user_id,'reduce')
         else:
-            return Response({'status': 'fail', 'error': '发生错误'})
+            coon.sadd('attention:'+str(user_id),target_user_id)
+            coon.sadd('beattention:' + str(target_user_id), user_id)
+            add_user_operation_data('attention', target_user_id, 'add')
+            # 异步推送消息给目标用户
+            push_to_user.delay(request.user,target_user_id,2)
+        return Response({'status':'ok','error':''})
+
 
 

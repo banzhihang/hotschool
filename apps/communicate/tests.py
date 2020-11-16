@@ -154,9 +154,9 @@ from datetime import datetime, timedelta
 #
 #
 # print(fib(45))
-POOL = redis.ConnectionPool(host='127.0.0.1', port=6379, db=1, decode_responses=True)
-
-coon = redis.Redis(connection_pool=POOL)
-a = coon.hset('user:connect',str(1),'vv')
-
-print(a)
+# POOL = redis.ConnectionPool(host='127.0.0.1', port=6379, db=1, decode_responses=True)
+#
+# coon = redis.Redis(connection_pool=POOL)
+# a = coon.hset('user:connect',str(1),'vv')
+#
+# print(a)

@@ -23,6 +23,7 @@ class User(AbstractUser):
 
 class School(models.Model):
     """学校表"""
+    id = models.IntegerField(verbose_name='id', primary_key=True)
     name = models.CharField(max_length=20, verbose_name='学校名', default='',db_index=True)
     is_campus = models.IntegerField(choices=((0, '不是校区'), (1, '是校区')), default=0, verbose_name='是否是一个校区')
     desc = models.CharField(max_length=100, verbose_name='描述', default='')
