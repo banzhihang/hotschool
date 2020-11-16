@@ -2,142 +2,13 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="a9a08896-2fca-4be8-8719-007b9aad069b" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/HotSchool/asgi.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/apps/draft/migrations/0002_fooddraft_flavour.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/apps/draft/migrations/0003_auto_20201101_1525.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/apps/draft/tasks.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/apps/food/migrations/0002_auto_20201101_1525.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/apps/search/elasticsearch2_ik_backend.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/apps/user/migrations/0004_auto_20201104_0911.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/celerybeat-schedule.bak" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/celerybeat-schedule.dat" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/celerybeat-schedule.dir" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/logs/all.log" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/logs/collect.log" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/logs/error.log" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/logs/script.log" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/image/a.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/image/b.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/image/c.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/image/d.jpg" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/HotSchool/celery.py" beforeDir="false" afterPath="$PROJECT_DIR$/HotSchool/celery.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/HotSchool/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/HotSchool/settings.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/HotSchool/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/HotSchool/urls.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/communicate/consumers.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/communicate/consumers.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/communicate/extra.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/communicate/extra.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/communicate/tests.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/communicate/tests.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/draft/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/draft/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/draft/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/draft/admin.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/draft/apps.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/draft/apps.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/draft/migrations/0001_initial.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/draft/migrations/0001_initial.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/draft/migrations/0002_auto_20200814_1003.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/draft/migrations/0003_auto_20200814_1025.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/draft/migrations/0004_auto_20200814_1135.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/draft/migrations/0005_auto_20200814_1240.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/draft/migrations/0006_auto_20200814_1243.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/draft/migrations/0007_auto_20200814_1244.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/draft/migrations/0008_auto_20200912_1536.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/draft/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/draft/models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/draft/serializers.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/draft/serializers.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/draft/tests.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/draft/tests.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/draft/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/draft/urls.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/draft/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/draft/views.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/food/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/food/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/food/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/food/admin.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/food/apps.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/food/apps.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/food/migrations/0001_initial.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/food/migrations/0001_initial.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/food/migrations/0002_auto_20200726_1511.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/food/migrations/0003_auto_20200726_1635.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/food/migrations/0004_auto_20200726_1955.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/food/migrations/0005_auto_20200726_2019.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/food/migrations/0006_eatrecord.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/food/migrations/0007_delete_eatrecord.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/food/migrations/0008_auto_20200726_2221.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/food/migrations/0009_foodcomment_revert_number.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/food/migrations/0010_auto_20200727_1903.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/food/migrations/0011_foodmark.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/food/migrations/0012_foodmark_score.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/food/migrations/0013_food_short_comment_number.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/food/migrations/0014_food_discuss_number.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/food/migrations/0015_auto_20200728_1016.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/food/migrations/0016_auto_20200728_1017.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/food/migrations/0017_auto_20200728_1018.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/food/migrations/0018_auto_20200728_1019.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/food/migrations/0019_auto_20200728_1021.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/food/migrations/0020_auto_20200731_2133.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/food/migrations/0021_auto_20201002_1652.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/food/paginations.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/food/paginations.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/food/serializers.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/food/serializers.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/food/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/food/views.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/operation/extra.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/operation/extra.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/operation/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/operation/views.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/question/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/question/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/question/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/question/admin.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/question/algorithms.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/question/algorithms.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/question/apps.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/question/apps.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/question/extra.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/question/extra.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/question/migrations/0001_initial.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/question/migrations/0001_initial.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/question/migrations/0002_auto_20200711_1456.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/question/migrations/0002_auto_20201101_1525.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/question/migrations/0003_auto_20200719_1523.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/question/migrations/0004_auto_20200722_0939.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/question/migrations/0005_auto_20200722_1020.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/question/migrations/0006_auto_20200722_1225.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/question/migrations/0007_auto_20200726_1502.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/question/migrations/0008_auto_20200731_1609.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/question/migrations/0009_auto_20200731_1659.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/question/migrations/0010_auto_20200731_1733.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/question/migrations/0011_auto_20200731_2133.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/question/migrations/0012_auto_20200809_2117.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/user/migrations/0002_auto_20201103_2208.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/question/migrations/0013_auto_20200814_1003.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/question/migrations/0014_auto_20200909_0917.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/question/migrations/0015_auto_20201002_1646.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/question/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/question/models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/question/paginations.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/question/paginations.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/question/tasks.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/question/tasks.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/question/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/question/views.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/recommend/extra.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/recommend/extra.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/recommend/paginations.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/recommend/paginations.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/recommend/serializers.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/recommend/serializers.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/recommend/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/recommend/views.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/search/filter.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/search/filter.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/search/paginations.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/search/paginations.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/search/serializers.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/search/serializers.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/search/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/search/views.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/upload/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/upload/views.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/user/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/user/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/user/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/user/admin.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/user/apps.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/user/apps.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/user/extra.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/user/extra.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/user/migrations/0001_initial.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/user/migrations/0001_initial.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/user/migrations/0002_auto_20200712_1134.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/user/migrations/0003_auto_20200713_0805.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/user/migrations/0004_auto_20200713_0807.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/user/migrations/0005_auto_20200715_1358.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/user/migrations/0006_delete_userdynamic.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/user/migrations/0007_userdynamic.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/user/migrations/0008_auto_20200719_1523.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/user/migrations/0009_auto_20200720_1021.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/user/migrations/0010_auto_20200720_1122.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/user/migrations/0011_auto_20200722_0939.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/user/migrations/0012_auto_20200725_1317.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/user/migrations/0013_auto_20200726_2026.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/user/migrations/0014_auto_20200731_2133.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/user/migrations/0015_school_is_campus.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/user/migrations/0016_remove_user_interest.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/user/migrations/0017_auto_20200911_1114.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/user/migrations/0018_usercollectfood.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/user/migrations/0019_auto_20200911_1613.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/user/migrations/0020_auto_20201004_1721.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/user/migrations/0021_auto_20201005_1515.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/user/migrations/0022_auto_20201010_0944.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/user/migrations/0003_auto_20201103_2213.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/user/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/user/models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/user/serializers.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/user/serializers.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/user/tests.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/user/tests.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/user/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/user/urls.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/user/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/user/views.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/media/headimage/GEjhzWwMdoev50u4bFKD8mPSCNc7g.jpeg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/media/headimage/anonymity.jpg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/media/headimage/ciWrNj4uqMD2SwzTOdtXQHob0flk.jpeg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/puclic.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/puclic.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/redis_namespace" beforeDir="false" afterPath="$PROJECT_DIR$/redis_namespace" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -375,13 +246,13 @@
       <method v="2" />
     </configuration>
     <list>
+      <item itemvalue="Django 服务器.HotSchool" />
+      <item itemvalue="Python.views (1)" />
       <item itemvalue="Python.consumers" />
       <item itemvalue="Python.puclic" />
       <item itemvalue="Python.test" />
       <item itemvalue="Python.tests (1)" />
       <item itemvalue="Python.tests" />
-      <item itemvalue="Python.views (1)" />
-      <item itemvalue="Django 服务器.HotSchool" />
     </list>
     <recent_temporary>
       <list>
@@ -585,6 +456,7 @@
       <workItem from="1605259329430" duration="612000" />
       <workItem from="1605274098667" duration="6000" />
       <workItem from="1605316147690" duration="430000" />
+      <workItem from="1605514592924" duration="428000" />
     </task>
     <servers />
   </component>
