@@ -59,7 +59,7 @@ jdcal==1.4.1
 jieba==0.42.1
 jmespath==0.10.0
 kombu==4.6.8
-lxml==4.5.2
+lxml==4.6.2
 MarkupPy==1.14
 monotonic==1.5
 msgpack==0.6.2
